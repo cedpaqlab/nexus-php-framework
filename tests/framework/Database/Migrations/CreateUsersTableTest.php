@@ -6,14 +6,11 @@ namespace Tests\Framework\Database\Migrations;
 
 use Tests\Support\DatabaseTestCase;
 use Database\Migrations\CreateUsersTable;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
-use App\Repositories\Database\Connection;
+use PDO;
 
 class CreateUsersTableTest extends DatabaseTestCase
 {
     private CreateUsersTable $migration;
-    private DatabaseConnectorInterface $connector;
 
     protected function setUp(): void
     {
@@ -22,9 +19,6 @@ class CreateUsersTableTest extends DatabaseTestCase
         $migrationFile = __DIR__ . '/../../../../database/migrations/20240101000001_CreateUsersTable.php';
         require_once $migrationFile;
         
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        $this->connector = $factory->create();
         $this->migration = new CreateUsersTable();
     }
 
@@ -38,7 +32,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $result = $this->pdo->query("SHOW TABLES LIKE 'users'")->fetch();
         $this->assertNotFalse($result);
@@ -48,7 +42,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $columns = $this->pdo->query("DESCRIBE users")->fetchAll(\PDO::FETCH_ASSOC);
         $columnNames = array_column($columns, 'Field');
@@ -66,7 +60,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $indexes = $this->pdo->query("SHOW INDEX FROM users WHERE Column_name = 'email'")->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertNotEmpty($indexes);
@@ -79,7 +73,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $indexes = $this->pdo->query("SHOW INDEX FROM users")->fetchAll(\PDO::FETCH_ASSOC);
         $indexNames = array_unique(array_column($indexes, 'Key_name'));
@@ -92,7 +86,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $stmt = $this->pdo->query("DESCRIBE users");
         $columns = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -105,7 +99,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $stmt = $this->pdo->query("DESCRIBE users");
         $columns = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -118,7 +112,7 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $this->pdo->exec("INSERT INTO users (email, password, name) VALUES ('test@example.com', 'hash', 'Test User')");
         
@@ -129,9 +123,9 @@ class CreateUsersTableTest extends DatabaseTestCase
     public function testDownDropsUsersTable(): void
     {
         $this->pdo->exec("DROP TABLE IF EXISTS users");
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
-        $this->migration->down($this->connector);
+        $this->migration->down($this->pdo);
         
         $result = $this->pdo->query("SHOW TABLES LIKE 'users'")->fetch();
         $this->assertFalse($result);

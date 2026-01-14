@@ -4,26 +4,17 @@ declare(strict_types=1);
 
 namespace App\Database\Seeders;
 
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
-use App\Repositories\Database\Connection;
+use App\Repositories\Connectors\PropelConnector;
 
 class SeederRunner
 {
-    private DatabaseConnectorInterface $connector;
+    private PropelConnector $connector;
     private string $seedersPath;
 
-    public function __construct(?DatabaseConnectorInterface $connector = null)
+    public function __construct(?PropelConnector $connector = null)
     {
-        $this->connector = $connector ?? $this->createConnector();
+        $this->connector = $connector ?? new PropelConnector();
         $this->seedersPath = __DIR__ . '/../../../database/seeders';
-    }
-
-    private function createConnector(): DatabaseConnectorInterface
-    {
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        return $factory->create();
     }
 
     public function run(?string $seeder = null): void

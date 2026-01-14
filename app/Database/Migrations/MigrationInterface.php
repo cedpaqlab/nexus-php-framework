@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Database\Migrations;
 
-use App\Repositories\Contracts\DatabaseConnectorInterface;
+use PDO;
 
 interface MigrationInterface
 {
-    public function up(DatabaseConnectorInterface $connector): void;
+    public function up(PDO $pdo): void;
 
-    public function down(DatabaseConnectorInterface $connector): void;
+    public function down(PDO $pdo): void;
 }

@@ -6,25 +6,17 @@ namespace Tests\Framework\Database\Migrations;
 
 use Tests\Support\DatabaseTestCase;
 use App\Database\Migrations\MigrationRunner;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
 use App\Repositories\Database\Connection;
+use PDO;
 
 class MigrationRunnerTest extends DatabaseTestCase
 {
     private MigrationRunner $runner;
-    private string $migrationsPath;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        $connector = $factory->create();
-        
-        $this->runner = new MigrationRunner($connector);
-        $this->migrationsPath = __DIR__ . '/../../../../database/migrations';
+        $this->runner = new MigrationRunner($this->pdo);
     }
 
     protected function tearDown(): void

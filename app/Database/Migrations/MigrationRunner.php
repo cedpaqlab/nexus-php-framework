@@ -4,28 +4,19 @@ declare(strict_types=1);
 
 namespace App\Database\Migrations;
 
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
 use App\Repositories\Database\Connection;
-use Config;
+use PDO;
 
 class MigrationRunner
 {
-    private DatabaseConnectorInterface $connector;
+    private PDO $pdo;
     private string $migrationsPath;
     private string $migrationsTable = 'migrations';
 
-    public function __construct(?DatabaseConnectorInterface $connector = null)
+    public function __construct(?PDO $pdo = null)
     {
-        $this->connector = $connector ?? $this->createConnector();
+        $this->pdo = $pdo ?? Connection::getInstance();
         $this->migrationsPath = __DIR__ . '/../../../database/migrations';
-    }
-
-    private function createConnector(): DatabaseConnectorInterface
-    {
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        return $factory->create();
     }
 
     public function run(): void
@@ -75,7 +66,7 @@ class MigrationRunner
     private function ensureMigrationsTable(): void
     {
         try {
-            $this->connector->findWhere($this->migrationsTable, ['migration' => '__check__']);
+            $stmt = $this->pdo->query("SELECT 1 FROM {$this->migrationsTable} LIMIT 1");
         } catch (\Throwable $e) {
             $this->createMigrationsTable();
         }
@@ -88,14 +79,14 @@ class MigrationRunner
             executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $pdo = Connection::getInstance();
-        $pdo->exec($sql);
+        $this->pdo->exec($sql);
     }
 
     private function getExecutedMigrations(): array
     {
         try {
-            $results = $this->connector->findAll($this->migrationsTable, [], ['executed_at' => 'ASC']);
+            $stmt = $this->pdo->query("SELECT migration FROM {$this->migrationsTable} ORDER BY executed_at ASC");
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return array_column($results, 'migration');
         } catch (\Throwable $e) {
             return [];
@@ -146,10 +137,26 @@ class MigrationRunner
             echo "Running migration: {$migration}...\n";
         }
 
-        $this->connector->executeInTransaction(function () use ($instance, $migration) {
-            $instance->up($this->connector);
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $instance->up($this->pdo);
             $this->recordMigration($migration);
-        });
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (\PDOException $rollbackException) {
+                }
+            }
+            throw $e;
+        }
 
         if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
             echo "Migration completed: {$migration}\n";
@@ -182,17 +189,32 @@ class MigrationRunner
         }
 
         try {
-            $this->connector->executeInTransaction(function () use ($instance, $migration) {
-                $instance->down($this->connector);
-                try {
-                    $this->removeMigration($migration);
-                } catch (\Throwable $e) {
-                    if (str_contains($e->getMessage(), "doesn't exist") || str_contains($e->getMessage(), "Base table")) {
-                        return;
-                    }
-                    throw $e;
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            $this->pdo->beginTransaction();
+            try {
+                $instance->down($this->pdo);
+                $this->removeMigration($migration);
+                if ($this->pdo->inTransaction()) {
+                    $this->pdo->commit();
                 }
-            });
+            } catch (\Throwable $e) {
+                if ($this->pdo->inTransaction()) {
+                    try {
+                        $this->pdo->rollBack();
+                    } catch (\PDOException $rollbackException) {
+                    }
+                }
+                if (str_contains($e->getMessage(), "doesn't exist") || str_contains($e->getMessage(), "Base table")) {
+                    if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+                        echo "Migration table already dropped.\n";
+                    }
+                    return;
+                }
+                throw $e;
+            }
         } catch (\Throwable $e) {
             if (str_contains($e->getMessage(), "doesn't exist") || str_contains($e->getMessage(), "Base table")) {
                 if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
@@ -222,15 +244,13 @@ class MigrationRunner
 
     private function recordMigration(string $migration): void
     {
-        $this->connector->create($this->migrationsTable, [
-            'migration' => $migration,
-            'executed_at' => date('Y-m-d H:i:s'),
-        ]);
+        $stmt = $this->pdo->prepare("INSERT INTO {$this->migrationsTable} (migration, executed_at) VALUES (?, ?)");
+        $stmt->execute([$migration, date('Y-m-d H:i:s')]);
     }
 
     private function removeMigration(string $migration): void
     {
-        $this->connector->delete($this->migrationsTable, ['migration' => $migration]);
+        $stmt = $this->pdo->prepare("DELETE FROM {$this->migrationsTable} WHERE migration = ?");
+        $stmt->execute([$migration]);
     }
-
 }

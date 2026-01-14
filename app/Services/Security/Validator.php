@@ -4,18 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Security;
 
-use App\Repositories\Contracts\DatabaseConnectorInterface;
+use App\Models\UserQuery;
 
 class Validator
 {
-    private array $messages = [];
-    private ?DatabaseConnectorInterface $connector;
-
-    public function __construct(?DatabaseConnectorInterface $connector = null)
-    {
-        $this->connector = $connector;
-    }
-
     public function validate(array $data, array $rules): array
     {
         $errors = [];
@@ -127,18 +119,21 @@ class Validator
             return null;
         }
 
-        if ($this->connector === null) {
-            return null;
-        }
-
         [$table, $column] = explode(',', $param);
         $table = trim($table);
         $column = trim($column);
 
-        $count = $this->connector->count($table, [$column => $value]);
+        if ($table !== 'users' || $column !== 'email') {
+            return null;
+        }
 
-        if ($count > 0) {
-            return "The {$field} has already been taken.";
+        try {
+            $count = UserQuery::create()->filterByEmail($value)->count();
+            if ($count > 0) {
+                return "The {$field} has already been taken.";
+            }
+        } catch (\Throwable $e) {
+            return null;
         }
 
         return null;

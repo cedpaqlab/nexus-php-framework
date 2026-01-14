@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Database\Migrations;
 
 use App\Database\Migrations\MigrationInterface;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Database\Connection;
+use PDO;
 
 class CreateUsersTable implements MigrationInterface
 {
-    public function up(DatabaseConnectorInterface $connector): void
+    public function up(PDO $pdo): void
     {
         $sql = "CREATE TABLE IF NOT EXISTS users (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -24,14 +23,12 @@ class CreateUsersTable implements MigrationInterface
             INDEX idx_role (role)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $pdo = Connection::getInstance();
         $pdo->exec($sql);
     }
 
-    public function down(DatabaseConnectorInterface $connector): void
+    public function down(PDO $pdo): void
     {
         $sql = "DROP TABLE IF EXISTS users";
-        $pdo = Connection::getInstance();
         $pdo->exec($sql);
     }
 }

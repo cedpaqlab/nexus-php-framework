@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Repositories\Database\Connection;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
+use App\Repositories\Connectors\PropelConnector;
 use App\Services\Security\CsrfService;
 use App\Services\Security\HashService;
 use App\Services\Security\Validator;
@@ -23,34 +21,22 @@ use App\Http\Middlewares\SuperAdminMiddleware;
 use App\Http\Middlewares\AuthMiddleware;
 use App\Http\Middlewares\SecurityHeadersMiddleware;
 use Container;
-use PDO;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->registerDatabase();
+        $this->registerPropel();
         $this->registerSecurity();
         $this->registerServices();
         $this->registerHttp();
         $this->registerUserServices();
     }
 
-    private function registerDatabase(): void
+    private function registerPropel(): void
     {
-        $this->container->singleton(Connection::class, function () {
-            return new Connection();
-        });
-        
-        // Keep backward compatibility with getInstance()
-        $this->container->singleton(PDO::class, function (Container $container) {
-            return $container->get(Connection::class)->getPdo();
-        });
-
-        $this->container->singleton(DatabaseConnectorInterface::class, function (Container $container) {
-            $connection = $container->get(Connection::class);
-            $factory = new ConnectorFactory($connection);
-            return $factory->create();
+        $this->container->singleton(PropelConnector::class, function () {
+            return new PropelConnector();
         });
     }
 
@@ -69,11 +55,8 @@ class AppServiceProvider extends ServiceProvider
             return new HashService();
         });
 
-        $this->container->singleton(Validator::class, function (Container $container) {
-            $connector = $container->has(DatabaseConnectorInterface::class) 
-                ? $container->get(DatabaseConnectorInterface::class) 
-                : null;
-            return new Validator($connector);
+        $this->container->singleton(Validator::class, function () {
+            return new Validator();
         });
     }
 
@@ -120,7 +103,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->container->singleton(\App\Repositories\User\UserRepository::class, function (Container $container) {
             return new \App\Repositories\User\UserRepository(
-                $container->get(DatabaseConnectorInterface::class)
+                $container->get(PropelConnector::class)
             );
         });
 

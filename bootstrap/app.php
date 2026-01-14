@@ -6,6 +6,7 @@ require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/autoloader.php';
 require_once __DIR__ . '/../config/loader.php';
 require_once __DIR__ . '/container.php';
+require_once __DIR__ . '/propel.php';
 require_once __DIR__ . '/error_handler.php';
 
 use App\Services\Helpers\PathHelper;

@@ -1,0 +1,20 @@
+runtime:
+  defaultConnection: default
+  connections:
+    default:
+      adapter: mysql
+      classname: Propel\Runtime\Connection\ConnectionWrapper
+      dsn: mysql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE};charset=utf8mb4
+      user: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      settings:
+        charset: utf8mb4
+        queries:
+          utf8: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+
+generator:
+  defaultConnection: default
+  connections:
+    - default
+  targetPackage: App\Models
+  namespaceAutoPackage: false

@@ -23,7 +23,6 @@ class UserService
 
         $data['password'] = $this->hashService->make($data['password']);
         $data['role'] = $data['role'] ?? 'user';
-        $data['created_at'] = date('Y-m-d H:i:s');
 
         return $this->userRepository->create($data);
     }

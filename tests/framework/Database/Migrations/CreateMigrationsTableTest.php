@@ -6,14 +6,11 @@ namespace Tests\Framework\Database\Migrations;
 
 use Tests\Support\DatabaseTestCase;
 use Database\Migrations\CreateMigrationsTable;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
-use App\Repositories\Database\Connection;
+use PDO;
 
 class CreateMigrationsTableTest extends DatabaseTestCase
 {
     private CreateMigrationsTable $migration;
-    private DatabaseConnectorInterface $connector;
 
     protected function setUp(): void
     {
@@ -22,9 +19,6 @@ class CreateMigrationsTableTest extends DatabaseTestCase
         $migrationFile = __DIR__ . '/../../../../database/migrations/20240101000000_CreateMigrationsTable.php';
         require_once $migrationFile;
         
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        $this->connector = $factory->create();
         $this->migration = new CreateMigrationsTable();
     }
 
@@ -38,7 +32,7 @@ class CreateMigrationsTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $result = $this->pdo->query("SHOW TABLES LIKE 'migrations'")->fetch();
         $this->assertNotFalse($result);
@@ -48,7 +42,7 @@ class CreateMigrationsTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $columns = $this->pdo->query("DESCRIBE migrations")->fetchAll(\PDO::FETCH_ASSOC);
         $columnNames = array_column($columns, 'Field');
@@ -61,7 +55,7 @@ class CreateMigrationsTableTest extends DatabaseTestCase
     {
         $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
         $indexes = $this->pdo->query("SHOW INDEX FROM migrations WHERE Key_name = 'PRIMARY'")->fetchAll(\PDO::FETCH_ASSOC);
         $this->assertNotEmpty($indexes);
@@ -71,9 +65,9 @@ class CreateMigrationsTableTest extends DatabaseTestCase
     public function testDownDropsMigrationsTable(): void
     {
         $this->pdo->exec("DROP TABLE IF EXISTS migrations");
-        $this->migration->up($this->connector);
+        $this->migration->up($this->pdo);
         
-        $this->migration->down($this->connector);
+        $this->migration->down($this->pdo);
         
         $result = $this->pdo->query("SHOW TABLES LIKE 'migrations'")->fetch();
         $this->assertFalse($result);

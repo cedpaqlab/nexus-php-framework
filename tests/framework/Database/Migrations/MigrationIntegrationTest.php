@@ -6,9 +6,8 @@ namespace Tests\Framework\Database\Migrations;
 
 use Tests\Support\TestCase;
 use App\Database\Migrations\MigrationRunner;
-use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
 use App\Repositories\Database\Connection;
+use PDO;
 
 class MigrationIntegrationTest extends TestCase
 {
@@ -27,11 +26,8 @@ class MigrationIntegrationTest extends TestCase
     {
         $this->skipIfNoDatabase();
         
-        $connection = new Connection();
-        $factory = new ConnectorFactory($connection);
-        $connector = $factory->create();
-        
-        $runner = new MigrationRunner($connector);
+        $pdo = Connection::getInstance();
+        $runner = new MigrationRunner($pdo);
         
         $this->assertInstanceOf(MigrationRunner::class, $runner);
     }

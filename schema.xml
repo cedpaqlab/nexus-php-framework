@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database name="default" defaultIdMethod="native" namespace="App\Models">
+    <table name="users" phpName="User">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="email" type="VARCHAR" size="255" required="true"/>
+        <column name="password" type="VARCHAR" size="255" required="true"/>
+        <column name="name" type="VARCHAR" size="100" required="true"/>
+        <column name="role" type="ENUM" valueSet="'user', 'admin', 'super_admin'" default="user" required="true"/>
+        <column name="created_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP"/>
+        <column name="updated_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" onUpdate="CURRENT_TIMESTAMP"/>
+        <unique>
+            <unique-column name="email"/>
+        </unique>
+        <index>
+            <index-column name="email"/>
+        </index>
+        <index>
+            <index-column name="role"/>
+        </index>
+    </table>
+</database>

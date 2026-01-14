@@ -4,256 +4,154 @@ declare(strict_types=1);
 
 namespace App\Repositories\Connectors;
 
-use App\Repositories\Contracts\DatabaseConnectorInterface;
+use App\Models\User;
+use App\Models\UserQuery;
+use App\Repositories\Connectors\PropelInitializer;
 use Propel\Runtime\Propel;
-use Propel\Runtime\Connection\ConnectionManagerSingle;
-use Propel\Runtime\ServiceContainer\ServiceContainerInterface;
+use Propel\Runtime\Exception\PropelException;
 
-class PropelConnector implements DatabaseConnectorInterface
+class PropelConnector
 {
-    private \Propel\Runtime\Connection\ConnectionInterface $connection;
-
     public function __construct()
     {
-        $this->initializePropel();
-        $this->connection = Propel::getConnection();
+        PropelInitializer::initialize();
     }
 
-    private function initializePropel(): void
+    public function findUserById(int $id): ?User
     {
         try {
-            $serviceContainer = Propel::getServiceContainer();
-        } catch (\Throwable $e) {
-            Propel::init();
-            $serviceContainer = Propel::getServiceContainer();
+            return UserQuery::create()->findPk($id);
+        } catch (PropelException $e) {
+            return null;
         }
-
-        if ($serviceContainer->hasConnectionManager('default')) {
-            return;
-        }
-
-        $serviceContainer->setAdapterClass('default', '\\Propel\\Runtime\\Adapter\\Pdo\\MysqlAdapter');
-        $serviceContainer->setDefaultDatasource('default');
-        
-        $manager = new ConnectionManagerSingle('default');
-        
-        if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') {
-            $username = $_ENV['DB_TEST_USERNAME'] ?? $_ENV['DB_USERNAME'] ?? 'root';
-            $password = $_ENV['DB_TEST_PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '';
-        } else {
-            $username = $_ENV['DB_USERNAME'] ?? 'root';
-            $password = $_ENV['DB_PASSWORD'] ?? '';
-        }
-        
-        $manager->setConfiguration([
-            'dsn' => $this->buildDsn(),
-            'user' => $username,
-            'password' => $password,
-            'settings' => [
-                'charset' => 'utf8mb4',
-                'queries' => [
-                    'utf8' => 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci',
-                ],
-            ],
-        ]);
-        
-        $serviceContainer->setConnectionManager($manager);
     }
 
-    private function buildDsn(): string
+    public function findUserByEmail(string $email): ?User
     {
-        if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') {
-            $host = $_ENV['DB_TEST_HOST'] ?? $_ENV['DB_HOST'] ?? '127.0.0.1';
-            $port = (int) ($_ENV['DB_TEST_PORT'] ?? $_ENV['DB_PORT'] ?? 3306);
-            $database = $_ENV['DB_TEST_DATABASE'] ?? ($_ENV['DB_DATABASE'] ?? '') . '_test';
-        } else {
-            $host = $_ENV['DB_HOST'] ?? '127.0.0.1';
-            $port = (int) ($_ENV['DB_PORT'] ?? 3306);
-            $database = $_ENV['DB_DATABASE'] ?? '';
+        try {
+            return UserQuery::create()->findOneByEmail($email);
+        } catch (PropelException $e) {
+            return null;
         }
-        
-        return sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $host, $port, $database);
     }
 
-    public function find(string $table, int $id): ?array
+    public function findAllUsers(array $conditions = [], array $orderBy = [], ?int $limit = null, ?int $offset = null): array
     {
-        $query = sprintf('SELECT * FROM %s WHERE id = :id LIMIT 1', $table);
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute(['id' => $id]);
-        
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $result ?: null;
+        try {
+            $query = $this->buildQuery($conditions, $orderBy, $limit, $offset);
+            return $query->find()->toArray();
+        } catch (PropelException $e) {
+            return [];
+        }
     }
 
-    public function findWhere(string $table, array $conditions): ?array
+    public function createUser(array $data): User
     {
-        $whereClause = [];
-        $params = [];
-        
-        foreach ($conditions as $column => $value) {
-            $whereClause[] = "{$column} = :{$column}";
-            $params[$column] = $value;
-        }
-        
-        $query = sprintf('SELECT * FROM %s WHERE %s LIMIT 1', $table, implode(' AND ', $whereClause));
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $result ?: null;
+        $user = new User();
+        $user->setEmail($data['email']);
+        $user->setPassword($data['password']);
+        $user->setName($data['name']);
+        $user->setRole($data['role'] ?? 'user');
+        $user->save();
+
+        return $user;
     }
 
-    public function findAll(string $table, array $conditions = [], array $orderBy = [], ?int $limit = null, ?int $offset = null): array
+    public function updateUser(User $user, array $data): User
     {
-        $whereClause = [];
-        $params = [];
-        
-        foreach ($conditions as $column => $value) {
-            $whereClause[] = "{$column} = :{$column}";
-            $params[$column] = $value;
+        if (isset($data['email'])) {
+            $user->setEmail($data['email']);
         }
-        
-        $query = sprintf('SELECT * FROM %s', $table);
-        
-        if (!empty($whereClause)) {
-            $query .= ' WHERE ' . implode(' AND ', $whereClause);
+        if (isset($data['password'])) {
+            $user->setPassword($data['password']);
         }
-        
-        if (!empty($orderBy)) {
-            $orderParts = [];
-            foreach ($orderBy as $column => $direction) {
-                $orderParts[] = "{$column} {$direction}";
-            }
-            $query .= ' ORDER BY ' . implode(', ', $orderParts);
+        if (isset($data['name'])) {
+            $user->setName($data['name']);
         }
-        
-        if ($limit !== null && $offset !== null) {
-            $query .= " LIMIT {$limit} OFFSET {$offset}";
-        } elseif ($limit !== null) {
-            $query .= " LIMIT {$limit}";
-        } elseif ($offset !== null) {
-            $query .= " LIMIT 18446744073709551615 OFFSET {$offset}";
+        if (isset($data['role'])) {
+            $user->setRole($data['role']);
         }
-        
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $user->save();
+
+        return $user;
     }
 
-    public function create(string $table, array $data): int
+    public function deleteUser(User $user): void
     {
-        $columns = array_keys($data);
-        $placeholders = array_map(fn($col) => ":{$col}", $columns);
-        
-        $query = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $table,
-            implode(', ', $columns),
-            implode(', ', $placeholders)
-        );
-        
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($data);
-        
-        return (int) $this->connection->lastInsertId();
+        $user->delete();
     }
 
-    public function update(string $table, array $data, array $conditions): int
+    public function countUsers(array $conditions = []): int
     {
-        $setClause = [];
-        $whereClause = [];
-        $params = [];
-        
-        foreach ($data as $column => $value) {
-            $setClause[] = "{$column} = :set_{$column}";
-            $params["set_{$column}"] = $value;
+        try {
+            $query = $this->buildQuery($conditions, [], null, null);
+            return $query->count();
+        } catch (PropelException $e) {
+            return 0;
         }
-        
-        foreach ($conditions as $column => $value) {
-            $whereClause[] = "{$column} = :where_{$column}";
-            $params["where_{$column}"] = $value;
-        }
-        
-        $query = sprintf(
-            'UPDATE %s SET %s WHERE %s',
-            $table,
-            implode(', ', $setClause),
-            implode(' AND ', $whereClause)
-        );
-        
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        
-        return $stmt->rowCount();
-    }
-
-    public function delete(string $table, array $conditions): int
-    {
-        $whereClause = [];
-        $params = [];
-        
-        foreach ($conditions as $column => $value) {
-            $whereClause[] = "{$column} = :{$column}";
-            $params[$column] = $value;
-        }
-        
-        $query = sprintf('DELETE FROM %s WHERE %s', $table, implode(' AND ', $whereClause));
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        
-        return $stmt->rowCount();
-    }
-
-    public function count(string $table, array $conditions = []): int
-    {
-        $whereClause = [];
-        $params = [];
-        
-        foreach ($conditions as $column => $value) {
-            $whereClause[] = "{$column} = :{$column}";
-            $params[$column] = $value;
-        }
-        
-        $query = sprintf('SELECT COUNT(*) as count FROM %s', $table);
-        
-        if (!empty($whereClause)) {
-            $query .= ' WHERE ' . implode(' AND ', $whereClause);
-        }
-        
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-        return (int) ($result['count'] ?? 0);
     }
 
     public function beginTransaction(): void
     {
-        $this->connection->beginTransaction();
+        Propel::getConnection()->beginTransaction();
     }
 
     public function commit(): void
     {
-        $this->connection->commit();
+        Propel::getConnection()->commit();
     }
 
     public function rollback(): void
     {
-        $this->connection->rollBack();
+        Propel::getConnection()->rollBack();
     }
 
     public function executeInTransaction(callable $callback): mixed
     {
-        $this->beginTransaction();
-        
+        $connection = Propel::getConnection();
+        $connection->beginTransaction();
+
         try {
             $result = $callback();
-            $this->commit();
+            $connection->commit();
             return $result;
         } catch (\Throwable $e) {
-            $this->rollback();
+            $connection->rollBack();
             throw $e;
         }
+    }
+
+    private function buildQuery(array $conditions, array $orderBy, ?int $limit, ?int $offset): UserQuery
+    {
+        $query = UserQuery::create();
+
+        foreach ($conditions as $column => $value) {
+            $method = 'filterBy' . $this->camelize($column);
+            if (method_exists($query, $method)) {
+                $query->$method($value);
+            }
+        }
+
+        foreach ($orderBy as $column => $direction) {
+            $method = 'orderBy' . $this->camelize($column);
+            if (method_exists($query, $method)) {
+                $query->$method($direction);
+            }
+        }
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        if ($offset !== null) {
+            $query->offset($offset);
+        }
+
+        return $query;
+    }
+
+    private function camelize(string $string): string
+    {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }
 }
