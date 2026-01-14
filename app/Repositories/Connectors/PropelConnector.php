@@ -30,7 +30,7 @@ class PropelConnector
     public function findAllUsers(array $conditions = [], array $orderBy = [], ?int $limit = null, ?int $offset = null): array
     {
         return $this->executeQuery(
-            fn() => $this->buildQuery($conditions, $orderBy, $limit, $offset)->find()->toArray(),
+            fn() => $this->buildQuery($conditions, $orderBy, $limit, $offset)->find()->getData(),
             []
         );
     }

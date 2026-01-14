@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Load Composer autoloader first (for Propel and other vendor classes)
+require_once __DIR__ . '/../vendor/autoload.php';
+
 require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/autoloader.php';
 require_once __DIR__ . '/../config/loader.php';

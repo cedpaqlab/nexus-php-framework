@@ -66,6 +66,11 @@ class UserService
             throw new \RuntimeException("User with ID {$id} not found");
         }
 
+        // Prevent downgrading super_admin role
+        if (($user['role'] ?? '') === 'super_admin' && $role !== 'super_admin') {
+            throw new \RuntimeException("Cannot change role of super_admin user");
+        }
+
         return $this->userRepository->update($id, ['role' => $role]);
     }
 

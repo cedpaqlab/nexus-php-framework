@@ -940,7 +940,10 @@ abstract class User implements ActiveRecordInterface
 
                         break;
                     case 'role':
-                        $stmt->bindValue($identifier, $this->role, PDO::PARAM_STR);
+                        // Convert ENUM index to string value for database
+                        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+                        $roleValue = isset($valueSet[$this->role]) ? $valueSet[$this->role] : $this->role;
+                        $stmt->bindValue($identifier, $roleValue, PDO::PARAM_STR);
 
                         break;
                     case 'created_at':

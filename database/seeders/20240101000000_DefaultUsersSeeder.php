@@ -45,6 +45,9 @@ class DefaultUsersSeeder implements SeederInterface
             
             if ($existing === null) {
                 $connector->createUser($userData);
+            } else {
+                // Update existing user to ensure correct role and password
+                $connector->updateUser($existing, $userData);
             }
         }
     }

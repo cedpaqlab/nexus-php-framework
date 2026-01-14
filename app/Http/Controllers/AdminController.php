@@ -170,6 +170,10 @@ class AdminController
         } catch (\InvalidArgumentException $e) {
             return $this->response->json(['success' => false, 'error' => 'Invalid role'], 400);
         } catch (\RuntimeException $e) {
+            $message = $e->getMessage();
+            if (str_contains($message, 'Cannot change role of super_admin')) {
+                return $this->response->json(['success' => false, 'error' => 'Cannot change role of super_admin user'], 403);
+            }
             return $this->response->json(['success' => false, 'error' => 'User not found'], 404);
         } catch (\Exception $e) {
             return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
