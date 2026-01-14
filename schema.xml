@@ -5,7 +5,7 @@
         <column name="email" type="VARCHAR" size="255" required="true"/>
         <column name="password" type="VARCHAR" size="255" required="true"/>
         <column name="name" type="VARCHAR" size="100" required="true"/>
-        <column name="role" type="ENUM" valueSet="'user', 'admin', 'super_admin'" default="user" required="true"/>
+        <column name="role" type="ENUM" valueSet="user,admin,super_admin" default="user" required="true"/>
         <column name="created_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP"/>
         <column name="updated_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" onUpdate="CURRENT_TIMESTAMP"/>
         <unique>

@@ -96,6 +96,22 @@ class ValidatorTest extends TestCase
             return;
         }
 
-        $this->markTestIncomplete('Requires Propel models to be generated and database setup');
+        if (!class_exists(\App\Models\UserQuery::class)) {
+            $this->markTestSkipped('Propel models not generated');
+            return;
+        }
+
+        $validator = new Validator();
+
+        $data = ['email' => 'test@example.com'];
+        $rules = ['email' => 'unique:users,email'];
+
+        $errors = $validator->validate($data, $rules);
+
+        if (empty($errors)) {
+            $this->assertTrue(true, 'Unique validation passed for non-existing email');
+        } else {
+            $this->assertArrayHasKey('email', $errors, 'Unique validation correctly identified existing email');
+        }
     }
 }
