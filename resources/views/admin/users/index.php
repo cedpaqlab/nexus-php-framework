@@ -45,9 +45,6 @@ ob_start();
                 <td><?= htmlspecialchars($user['created_at'] ?? '') ?></td>
                 <td class="actions">
                     <a href="/admin/users/<?= $user['id'] ?? '' ?>/edit" class="btn-small">Edit</a>
-                    <button onclick="updateRole(<?= $user['id'] ?? '' ?>, '<?= $user['role'] === 'admin' ? 'user' : 'admin' ?>')" class="btn-small btn-role">
-                        Make <?= $user['role'] === 'admin' ? 'User' : 'Admin' ?>
-                    </button>
                     <button onclick="deleteUser(<?= $user['id'] ?? '' ?>)" class="btn-small btn-danger">Delete</button>
                 </td>
             </tr>
@@ -73,23 +70,6 @@ function deleteUser(id) {
         },
         error: function() {
             alert('Error deleting user');
-        }
-    });
-}
-
-function updateRole(id, role) {
-    $.ajax({
-        url: '/admin/users/' + id + '/role',
-        method: 'POST',
-        headers: {
-            'X-CSRF-Token': csrfToken
-        },
-        data: { role: role, _csrf_token: csrfToken },
-        success: function() {
-            location.reload();
-        },
-        error: function() {
-            alert('Error updating role');
         }
     });
 }
