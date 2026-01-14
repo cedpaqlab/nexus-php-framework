@@ -10,11 +10,13 @@ class HashService
 {
     private string $algo;
     private array $options;
+    private RandomService $randomService;
 
-    public function __construct()
+    public function __construct(?RandomService $randomService = null)
     {
         $this->algo = Config::get('security.password.algo', PASSWORD_DEFAULT);
         $this->options = Config::get('security.password.options', []);
+        $this->randomService = $randomService ?? new RandomService();
     }
 
     public function make(string $password): string
@@ -34,6 +36,7 @@ class HashService
 
     public function randomToken(int $length = 32): string
     {
-        return bin2hex(random_bytes($length));
+        // PHP 8.3: Use RandomService with Random\Randomizer
+        return $this->randomService->randomToken($length);
     }
 }

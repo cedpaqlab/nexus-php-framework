@@ -12,19 +12,22 @@ class CsrfService
     private string $tokenName;
     private int $tokenLifetime;
     private SessionService $session;
+    private RandomService $randomService;
 
-    public function __construct(?SessionService $session = null)
+    public function __construct(?SessionService $session = null, ?RandomService $randomService = null)
     {
         $this->tokenName = Config::get('security.csrf.token_name', '_csrf_token');
         $this->tokenLifetime = Config::get('security.csrf.token_lifetime', 3600);
         $this->session = $session ?? new SessionService();
+        $this->randomService = $randomService ?? new RandomService();
     }
 
     public function generate(): string
     {
         if (!$this->session->has($this->tokenName)) {
+            // PHP 8.3: Use RandomService with Random\Randomizer
             $this->session->set($this->tokenName, [
-                'token' => bin2hex(random_bytes(32)),
+                'token' => $this->randomService->randomToken(32),
                 'expires' => time() + $this->tokenLifetime,
             ]);
         }

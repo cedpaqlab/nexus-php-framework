@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Repositories\Connectors\PropelConnector;
 use App\Services\Security\CsrfService;
 use App\Services\Security\HashService;
+use App\Services\Security\RandomService;
 use App\Services\Security\Validator;
 use App\Services\Session\SessionService;
 use App\Services\User\UserService;
@@ -46,13 +47,19 @@ class AppServiceProvider extends ServiceProvider
             return new SessionService();
         });
 
-        $this->container->singleton(CsrfService::class, function (Container $container) {
-            $session = $container->get(SessionService::class);
-            return new CsrfService($session);
+        $this->container->singleton(RandomService::class, function () {
+            return new RandomService();
         });
 
-        $this->container->singleton(HashService::class, function () {
-            return new HashService();
+        $this->container->singleton(CsrfService::class, function (Container $container) {
+            $session = $container->get(SessionService::class);
+            $randomService = $container->get(RandomService::class);
+            return new CsrfService($session, $randomService);
+        });
+
+        $this->container->singleton(HashService::class, function (Container $container) {
+            $randomService = $container->get(RandomService::class);
+            return new HashService($randomService);
         });
 
         $this->container->singleton(Validator::class, function () {
