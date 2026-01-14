@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Services\Logger\Logger;
-use Config;
 
 static $logger = null;
 
@@ -18,7 +17,7 @@ set_error_handler(function (int $severity, string $message, string $file, int $l
 
     $logger->error("Error: {$message} in {$file} on line {$line}");
 
-    $debug = Config::get('app.debug', false);
+    $debug = \Config::get('app.debug', false);
 
     if ($debug) {
         echo "<pre>Error: {$message}\nFile: {$file}\nLine: {$line}</pre>";
@@ -36,7 +35,7 @@ set_exception_handler(function (Throwable $exception) use (&$logger): void {
 
     http_response_code(500);
 
-    $debug = Config::get('app.debug', false);
+    $debug = \Config::get('app.debug', false);
 
     if ($debug) {
         echo "<pre>Uncaught Exception: " . get_class($exception) . "\n";

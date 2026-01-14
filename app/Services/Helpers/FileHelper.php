@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Helpers;
 
+use App\Exceptions\FileNotFoundException;
+
 class FileHelper
 {
     public static function exists(string $path): bool
@@ -14,7 +16,7 @@ class FileHelper
     public static function get(string $path): string
     {
         if (!self::exists($path)) {
-            throw new \RuntimeException("File not found: {$path}");
+            throw new FileNotFoundException($path);
         }
 
         return file_get_contents($path);

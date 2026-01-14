@@ -7,31 +7,28 @@ namespace App\Repositories\Factory;
 use App\Repositories\Contracts\DatabaseConnectorInterface;
 use App\Repositories\Connectors\QueryBuilderConnector;
 use App\Repositories\Connectors\PropelConnector;
+use App\Repositories\Database\Connection;
 use Config;
-use RuntimeException;
+use App\Exceptions\UnknownConnectorException;
+use App\Exceptions\PropelNotInstalledException;
 
 class ConnectorFactory
 {
-    public static function create(?string $connector = null): DatabaseConnectorInterface
+    public static function create(?string $connector = null, ?Connection $connection = null): DatabaseConnectorInterface
     {
         $connector = $connector ?? Config::get('database.connector', 'querybuilder');
 
         return match ($connector) {
-            'querybuilder' => new QueryBuilderConnector(),
+            'querybuilder' => new QueryBuilderConnector($connection),
             'propel' => self::createPropelConnector(),
-            default => throw new RuntimeException("Unknown database connector: {$connector}"),
+            default => throw new UnknownConnectorException($connector),
         };
     }
 
     private static function createPropelConnector(): PropelConnector
     {
         if (!class_exists(\Propel\Runtime\Propel::class)) {
-            throw new RuntimeException(
-                'Propel is not installed. ' .
-                'To install Propel for learning: ' .
-                'composer require --dev propel/propel:^2.0@beta --with-all-dependencies ' .
-                '(Note: Propel 2.0 is in beta, but it\'s the only version compatible with PHP 8.2+)'
-            );
+            throw new PropelNotInstalledException();
         }
 
         return new PropelConnector();

@@ -8,7 +8,7 @@ use PDO;
 
 class QueryBuilder
 {
-    private PDO $pdo;
+    private readonly PDO $pdo;
     private string $table;
     private array $selects = ['*'];
     private array $wheres = [];

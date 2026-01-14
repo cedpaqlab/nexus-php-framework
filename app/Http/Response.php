@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Http\HttpStatusCode;
+
 class Response
 {
     private int $statusCode = 200;
@@ -55,22 +57,22 @@ class Response
 
     public function notFound(string $message = 'Not Found'): self
     {
-        return $this->json(['error' => $message], 404);
+        return $this->json(['error' => $message], HttpStatusCode::NOT_FOUND->value());
     }
 
     public function unauthorized(string $message = 'Unauthorized'): self
     {
-        return $this->json(['error' => $message], 401);
+        return $this->json(['error' => $message], HttpStatusCode::UNAUTHORIZED->value());
     }
 
     public function forbidden(string $message = 'Forbidden'): self
     {
-        return $this->json(['error' => $message], 403);
+        return $this->json(['error' => $message], HttpStatusCode::FORBIDDEN->value());
     }
 
     public function serverError(string $message = 'Internal Server Error'): self
     {
-        return $this->json(['error' => $message], 500);
+        return $this->json(['error' => $message], HttpStatusCode::INTERNAL_SERVER_ERROR->value());
     }
 
     public function send(): void

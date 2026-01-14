@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\BindingNotFoundException;
+use App\Exceptions\InvalidBindingException;
+use App\Exceptions\ClassNotInstantiableException;
+use App\Exceptions\ParameterResolutionException;
+
 class Container
 {
     private array $bindings = [];
@@ -40,7 +45,7 @@ class Container
             if (class_exists($abstract)) {
                 return $this->resolve($abstract);
             }
-            throw new RuntimeException("No binding found for: {$abstract}");
+            throw new BindingNotFoundException($abstract);
         }
 
         $binding = $this->bindings[$abstract];
@@ -51,7 +56,7 @@ class Container
         } elseif (is_string($concrete) && class_exists($concrete)) {
             $instance = $this->resolve($concrete);
         } else {
-            throw new RuntimeException("Invalid binding for: {$abstract}");
+            throw new InvalidBindingException($abstract);
         }
 
         if ($binding['singleton']) {
@@ -79,7 +84,7 @@ class Container
         $reflection = new ReflectionClass($class);
 
         if (!$reflection->isInstantiable()) {
-            throw new RuntimeException("Class {$class} is not instantiable");
+            throw new ClassNotInstantiableException($class);
         }
 
         $constructor = $reflection->getConstructor();
@@ -98,7 +103,7 @@ class Container
                 if ($parameter->isDefaultValueAvailable()) {
                     $dependencies[] = $parameter->getDefaultValue();
                 } else {
-                    throw new RuntimeException("Cannot resolve parameter: {$parameter->getName()}");
+                    throw new ParameterResolutionException($parameter->getName());
                 }
             } else {
                 $dependencies[] = $this->make($type->getName());

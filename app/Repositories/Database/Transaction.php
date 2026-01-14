@@ -8,7 +8,7 @@ use PDO;
 
 class Transaction
 {
-    private PDO $pdo;
+    private readonly PDO $pdo;
 
     public function __construct(PDO $pdo)
     {

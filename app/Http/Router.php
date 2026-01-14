@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http;
 
 use Container;
+use App\Exceptions\MiddlewareNotFoundException;
 
 class Router
 {
@@ -87,7 +88,8 @@ class Router
             }
         }
 
-        return (new Response())->notFound();
+        $response = $this->getResponse();
+        return $response->notFound();
     }
 
     private function addRoute(string $method, string $path, callable|string|array $handler, array $middleware): void
@@ -128,7 +130,9 @@ class Router
         }
 
         if (!($middlewareInstance instanceof Middlewares\MiddlewareInterface)) {
-            throw new \RuntimeException('Middleware must implement MiddlewareInterface');
+            throw new MiddlewareNotFoundException(
+                is_string($current) ? $current : get_class($current)
+            );
         }
 
         return $middlewareInstance->handle($request, function (Request $req) use ($middleware, $next) {
@@ -154,7 +158,8 @@ class Router
             return $result;
         }
 
-        return (new Response())->json($result);
+        $response = $this->getResponse();
+        return $response->json($result);
     }
 
     private function resolveInstance(string $class): object
@@ -163,6 +168,23 @@ class Router
             return $this->container->get($class);
         }
 
+        if ($this->container !== null) {
+            return $this->container->make($class);
+        }
+
         return new $class();
+    }
+
+    private function getResponse(): Response
+    {
+        if ($this->container !== null && $this->container->has(Response::class)) {
+            return $this->container->get(Response::class);
+        }
+
+        if ($this->container !== null) {
+            return $this->container->make(Response::class);
+        }
+
+        return new Response();
     }
 }

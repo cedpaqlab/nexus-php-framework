@@ -6,10 +6,10 @@ namespace App\Http;
 
 class Request
 {
-    private array $data;
-    private array $server;
-    private array $files;
-    private array $headers;
+    private readonly array $data;
+    private readonly array $server;
+    private readonly array $files;
+    private readonly array $headers;
 
     public function __construct()
     {
