@@ -31,12 +31,14 @@ class Sanitizer
 
     public static function int(mixed $value): int
     {
-        return filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        $sanitized = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        return (int) $sanitized;
     }
 
     public static function float(mixed $value): float
     {
-        return filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $sanitized = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        return (float) $sanitized;
     }
 
     public static function array(array $data): array

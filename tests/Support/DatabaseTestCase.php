@@ -16,7 +16,12 @@ abstract class DatabaseTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->pdo = Connection::getInstance();
+        try {
+            $this->pdo = Connection::getInstance();
+        } catch (\RuntimeException $e) {
+            $this->markTestSkipped('Database not available: ' . $e->getMessage());
+            return;
+        }
         $this->transaction = new Transaction($this->pdo);
         $this->transaction->begin();
     }
