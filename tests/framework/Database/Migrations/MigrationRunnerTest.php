@@ -89,6 +89,8 @@ class MigrationRunnerTest extends DatabaseTestCase
         $this->assertIsArray($migrations);
         $this->assertContains('20240101000000_CreateMigrationsTable', $migrations);
         $this->assertContains('20240101000001_CreateUsersTable', $migrations);
+        $this->assertContains('20240101000002_CreateProductsTable', $migrations);
+        $this->assertContains('20240101000003_CreateOrdersTable', $migrations);
     }
 
     public function testGetMigrationClassNameConvertsFileNameToClassName(): void
@@ -106,18 +108,24 @@ class MigrationRunnerTest extends DatabaseTestCase
 
     public function testRunExecutesPendingMigrations(): void
     {
-        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
+        $this->pdo->exec("DROP TABLE IF EXISTS orders");
+        $this->pdo->exec("DROP TABLE IF EXISTS products");
         $this->pdo->exec("DROP TABLE IF EXISTS users");
+        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
         $this->runner->run();
         
         $migrations = $this->pdo->query("SELECT migration FROM migrations")->fetchAll(\PDO::FETCH_COLUMN);
         $this->assertContains('20240101000000_CreateMigrationsTable', $migrations);
         $this->assertContains('20240101000001_CreateUsersTable', $migrations);
+        $this->assertContains('20240101000002_CreateProductsTable', $migrations);
+        $this->assertContains('20240101000003_CreateOrdersTable', $migrations);
         
         $tables = $this->pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
         $this->assertContains('migrations', $tables);
         $this->assertContains('users', $tables);
+        $this->assertContains('products', $tables);
+        $this->assertContains('orders', $tables);
     }
 
     public function testRunDoesNotExecuteAlreadyExecutedMigrations(): void
@@ -142,8 +150,10 @@ class MigrationRunnerTest extends DatabaseTestCase
 
     public function testRollbackRemovesMigrationRecord(): void
     {
-        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
+        $this->pdo->exec("DROP TABLE IF EXISTS orders");
+        $this->pdo->exec("DROP TABLE IF EXISTS products");
         $this->pdo->exec("DROP TABLE IF EXISTS users");
+        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
         $this->runner->run();
         
@@ -158,8 +168,10 @@ class MigrationRunnerTest extends DatabaseTestCase
 
     public function testRollbackExecutesDownMethod(): void
     {
-        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
+        $this->pdo->exec("DROP TABLE IF EXISTS orders");
+        $this->pdo->exec("DROP TABLE IF EXISTS products");
         $this->pdo->exec("DROP TABLE IF EXISTS users");
+        $this->pdo->exec("DROP TABLE IF EXISTS migrations");
         
         $this->runner->run();
         
@@ -169,7 +181,7 @@ class MigrationRunnerTest extends DatabaseTestCase
         $this->runner->rollback(1);
         
         $tables = $this->pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
-        $this->assertNotContains('users', $tables);
+        $this->assertNotContains('orders', $tables);
     }
 
     private function cleanupTestMigrations(): void

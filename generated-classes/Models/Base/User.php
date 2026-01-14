@@ -682,15 +682,7 @@ abstract class User implements ActiveRecordInterface
             $this->name = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('Role', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col !== null) {
-                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                $this->role = array_search($col, $valueSet, true);
-                if ($this->role === false) {
-                    $this->role = null;
-                }
-            } else {
-                $this->role = null;
-            }
+            $this->role = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
@@ -926,12 +918,15 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = [];
         $index = 0;
 
+        $this->modifiedColumns[UserTableMap::COL_ID] = true;
         if (null !== $this->id) {
             throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserTableMap::COL_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        // Skip auto-increment primary key column
+        if ($this->isColumnModified(UserTableMap::COL_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'id';
+        }
         if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
             $modifiedColumns[':p' . $index++]  = 'email';
         }
@@ -978,10 +973,7 @@ abstract class User implements ActiveRecordInterface
 
                         break;
                     case 'role':
-                        // Convert ENUM index to string value for database
-                        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                        $roleValue = isset($valueSet[$this->role]) ? $valueSet[$this->role] : $this->role;
-                        $stmt->bindValue($identifier, $roleValue, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->role, PDO::PARAM_INT);
 
                         break;
                     case 'created_at':

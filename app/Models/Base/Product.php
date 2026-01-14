@@ -7,10 +7,10 @@ use \Exception;
 use \PDO;
 use App\Models\Order as ChildOrder;
 use App\Models\OrderQuery as ChildOrderQuery;
-use App\Models\User as ChildUser;
-use App\Models\UserQuery as ChildUserQuery;
+use App\Models\Product as ChildProduct;
+use App\Models\ProductQuery as ChildProductQuery;
 use App\Models\Map\OrderTableMap;
-use App\Models\Map\UserTableMap;
+use App\Models\Map\ProductTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -26,20 +26,20 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Util\PropelDateTime;
 
 /**
- * Base class that represents a row from the 'users' table.
+ * Base class that represents a row from the 'products' table.
  *
  *
  *
  * @package    propel.generator.Models.Base
  */
-abstract class User implements ActiveRecordInterface
+abstract class Product implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      *
      * @var string
      */
-    public const TABLE_MAP = '\\App\\Models\\Map\\UserTableMap';
+    public const TABLE_MAP = '\\App\\Models\\Map\\ProductTableMap';
 
 
     /**
@@ -76,20 +76,6 @@ abstract class User implements ActiveRecordInterface
     protected $id;
 
     /**
-     * The value for the email field.
-     *
-     * @var        string
-     */
-    protected $email;
-
-    /**
-     * The value for the password field.
-     *
-     * @var        string
-     */
-    protected $password;
-
-    /**
      * The value for the name field.
      *
      * @var        string
@@ -97,12 +83,34 @@ abstract class User implements ActiveRecordInterface
     protected $name;
 
     /**
-     * The value for the role field.
+     * The value for the description field.
+     *
+     * @var        string|null
+     */
+    protected $description;
+
+    /**
+     * The value for the price field.
+     *
+     * @var        string
+     */
+    protected $price;
+
+    /**
+     * The value for the stock field.
      *
      * Note: this column has a database default value of: 0
      * @var        int
      */
-    protected $role;
+    protected $stock;
+
+    /**
+     * The value for the status field.
+     *
+     * Note: this column has a database default value of: 0
+     * @var        int
+     */
+    protected $status;
 
     /**
      * The value for the created_at field.
@@ -150,11 +158,12 @@ abstract class User implements ActiveRecordInterface
      */
     public function applyDefaultValues(): void
     {
-        $this->role = 0;
+        $this->stock = 0;
+        $this->status = 0;
     }
 
     /**
-     * Initializes internal state of App\Models\Base\User object.
+     * Initializes internal state of App\Models\Base\Product object.
      * @see applyDefaults()
      */
     public function __construct()
@@ -249,9 +258,9 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>User</code> instance.  If
-     * <code>obj</code> is an instance of <code>User</code>, delegates to
-     * <code>equals(User)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>Product</code> instance.  If
+     * <code>obj</code> is an instance of <code>Product</code>, delegates to
+     * <code>equals(Product)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param mixed $obj The object to compare to.
      * @return bool Whether equal to the object specified.
@@ -392,26 +401,6 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [email] column value.
-     *
-     * @return string
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * Get the [password] column value.
-     *
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
      * Get the [name] column value.
      *
      * @return string
@@ -422,22 +411,52 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [role] column value.
+     * Get the [description] column value.
+     *
+     * @return string|null
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Get the [price] column value.
+     *
+     * @return string
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * Get the [stock] column value.
+     *
+     * @return int
+     */
+    public function getStock()
+    {
+        return $this->stock;
+    }
+
+    /**
+     * Get the [status] column value.
      *
      * @return string|null
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function getRole()
+    public function getStatus()
     {
-        if (null === $this->role) {
+        if (null === $this->status) {
             return null;
         }
-        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-        if (!isset($valueSet[$this->role])) {
-            throw new PropelException('Unknown stored enum key: ' . $this->role);
+        $valueSet = ProductTableMap::getValueSet(ProductTableMap::COL_STATUS);
+        if (!isset($valueSet[$this->status])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->status);
         }
 
-        return $valueSet[$this->role];
+        return $valueSet[$this->status];
     }
 
     /**
@@ -498,47 +517,7 @@ abstract class User implements ActiveRecordInterface
 
         if ($this->id !== $v) {
             $this->id = $v;
-            $this->modifiedColumns[UserTableMap::COL_ID] = true;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set the value of [email] column.
-     *
-     * @param string $v New value
-     * @return $this The current object (for fluent API support)
-     */
-    public function setEmail($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->email !== $v) {
-            $this->email = $v;
-            $this->modifiedColumns[UserTableMap::COL_EMAIL] = true;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set the value of [password] column.
-     *
-     * @param string $v New value
-     * @return $this The current object (for fluent API support)
-     */
-    public function setPassword($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->password !== $v) {
-            $this->password = $v;
-            $this->modifiedColumns[UserTableMap::COL_PASSWORD] = true;
+            $this->modifiedColumns[ProductTableMap::COL_ID] = true;
         }
 
         return $this;
@@ -558,32 +537,92 @@ abstract class User implements ActiveRecordInterface
 
         if ($this->name !== $v) {
             $this->name = $v;
-            $this->modifiedColumns[UserTableMap::COL_NAME] = true;
+            $this->modifiedColumns[ProductTableMap::COL_NAME] = true;
         }
 
         return $this;
     }
 
     /**
-     * Set the value of [role] column.
+     * Set the value of [description] column.
+     *
+     * @param string|null $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setDescription($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->description !== $v) {
+            $this->description = $v;
+            $this->modifiedColumns[ProductTableMap::COL_DESCRIPTION] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [price] column.
+     *
+     * @param string $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setPrice($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->price !== $v) {
+            $this->price = $v;
+            $this->modifiedColumns[ProductTableMap::COL_PRICE] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [stock] column.
+     *
+     * @param int $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setStock($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->stock !== $v) {
+            $this->stock = $v;
+            $this->modifiedColumns[ProductTableMap::COL_STOCK] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [status] column.
      *
      * @param string $v new value
      * @return $this The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function setRole($v)
+    public function setStatus($v)
     {
         if ($v !== null) {
-            $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+            $valueSet = ProductTableMap::getValueSet(ProductTableMap::COL_STATUS);
             if (!in_array($v, $valueSet)) {
                 throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
             }
             $v = array_search($v, $valueSet);
         }
 
-        if ($this->role !== $v) {
-            $this->role = $v;
-            $this->modifiedColumns[UserTableMap::COL_ROLE] = true;
+        if ($this->status !== $v) {
+            $this->status = $v;
+            $this->modifiedColumns[ProductTableMap::COL_STATUS] = true;
         }
 
         return $this;
@@ -602,7 +641,7 @@ abstract class User implements ActiveRecordInterface
         if ($this->created_at !== null || $dt !== null) {
             if ($this->created_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->created_at->format("Y-m-d H:i:s.u")) {
                 $this->created_at = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserTableMap::COL_CREATED_AT] = true;
+                $this->modifiedColumns[ProductTableMap::COL_CREATED_AT] = true;
             }
         } // if either are not null
 
@@ -622,7 +661,7 @@ abstract class User implements ActiveRecordInterface
         if ($this->updated_at !== null || $dt !== null) {
             if ($this->updated_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->updated_at->format("Y-m-d H:i:s.u")) {
                 $this->updated_at = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserTableMap::COL_UPDATED_AT] = true;
+                $this->modifiedColumns[ProductTableMap::COL_UPDATED_AT] = true;
             }
         } // if either are not null
 
@@ -639,7 +678,11 @@ abstract class User implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues(): bool
     {
-            if ($this->role !== 0) {
+            if ($this->stock !== 0) {
+                return false;
+            }
+
+            if ($this->status !== 0) {
                 return false;
             }
 
@@ -669,36 +712,31 @@ abstract class User implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : ProductTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
             $this->id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('Email', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->email = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('Password', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->password = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : ProductTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
             $this->name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('Role', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col !== null) {
-                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                $this->role = array_search($col, $valueSet, true);
-                if ($this->role === false) {
-                    $this->role = null;
-                }
-            } else {
-                $this->role = null;
-            }
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : ProductTableMap::translateFieldName('Description', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->description = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : ProductTableMap::translateFieldName('Price', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->price = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : ProductTableMap::translateFieldName('Stock', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->stock = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : ProductTableMap::translateFieldName('Status', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->status = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : ProductTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
             $this->created_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : ProductTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
@@ -711,10 +749,10 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 8; // 8 = ProductTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\App\\Models\\User'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\App\\Models\\Product'), 0, $e);
         }
     }
 
@@ -757,13 +795,13 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(ProductTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildUserQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildProductQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -784,8 +822,8 @@ abstract class User implements ActiveRecordInterface
      * @param ConnectionInterface $con
      * @return void
      * @throws \Propel\Runtime\Exception\PropelException
-     * @see User::setDeleted()
-     * @see User::isDeleted()
+     * @see Product::setDeleted()
+     * @see Product::isDeleted()
      */
     public function delete(?ConnectionInterface $con = null): void
     {
@@ -794,11 +832,11 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(ProductTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildUserQuery::create()
+            $deleteQuery = ChildProductQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -833,7 +871,7 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(ProductTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
@@ -852,7 +890,7 @@ abstract class User implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                UserTableMap::addInstanceToPool($this);
+                ProductTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -926,33 +964,39 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = [];
         $index = 0;
 
+        $this->modifiedColumns[ProductTableMap::COL_ID] = true;
         if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserTableMap::COL_ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . ProductTableMap::COL_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        // Skip auto-increment primary key column
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $modifiedColumns[':p' . $index++]  = 'email';
+        if ($this->isColumnModified(ProductTableMap::COL_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $modifiedColumns[':p' . $index++]  = 'password';
-        }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
+        if ($this->isColumnModified(ProductTableMap::COL_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'name';
         }
-        if ($this->isColumnModified(UserTableMap::COL_ROLE)) {
-            $modifiedColumns[':p' . $index++]  = 'role';
+        if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
+            $modifiedColumns[':p' . $index++]  = 'description';
         }
-        if ($this->isColumnModified(UserTableMap::COL_CREATED_AT)) {
+        if ($this->isColumnModified(ProductTableMap::COL_PRICE)) {
+            $modifiedColumns[':p' . $index++]  = 'price';
+        }
+        if ($this->isColumnModified(ProductTableMap::COL_STOCK)) {
+            $modifiedColumns[':p' . $index++]  = 'stock';
+        }
+        if ($this->isColumnModified(ProductTableMap::COL_STATUS)) {
+            $modifiedColumns[':p' . $index++]  = 'status';
+        }
+        if ($this->isColumnModified(ProductTableMap::COL_CREATED_AT)) {
             $modifiedColumns[':p' . $index++]  = 'created_at';
         }
-        if ($this->isColumnModified(UserTableMap::COL_UPDATED_AT)) {
+        if ($this->isColumnModified(ProductTableMap::COL_UPDATED_AT)) {
             $modifiedColumns[':p' . $index++]  = 'updated_at';
         }
 
         $sql = sprintf(
-            'INSERT INTO users (%s) VALUES (%s)',
+            'INSERT INTO products (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -965,23 +1009,24 @@ abstract class User implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
 
                         break;
-                    case 'email':
-                        $stmt->bindValue($identifier, $this->email, PDO::PARAM_STR);
-
-                        break;
-                    case 'password':
-                        $stmt->bindValue($identifier, $this->password, PDO::PARAM_STR);
-
-                        break;
                     case 'name':
                         $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
 
                         break;
-                    case 'role':
-                        // Convert ENUM index to string value for database
-                        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                        $roleValue = isset($valueSet[$this->role]) ? $valueSet[$this->role] : $this->role;
-                        $stmt->bindValue($identifier, $roleValue, PDO::PARAM_STR);
+                    case 'description':
+                        $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
+
+                        break;
+                    case 'price':
+                        $stmt->bindValue($identifier, $this->price, PDO::PARAM_STR);
+
+                        break;
+                    case 'stock':
+                        $stmt->bindValue($identifier, $this->stock, PDO::PARAM_INT);
+
+                        break;
+                    case 'status':
+                        $stmt->bindValue($identifier, $this->status, PDO::PARAM_INT);
 
                         break;
                     case 'created_at':
@@ -1038,7 +1083,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function getByName(string $name, string $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = ProductTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1058,21 +1103,24 @@ abstract class User implements ActiveRecordInterface
                 return $this->getId();
 
             case 1:
-                return $this->getEmail();
-
-            case 2:
-                return $this->getPassword();
-
-            case 3:
                 return $this->getName();
 
+            case 2:
+                return $this->getDescription();
+
+            case 3:
+                return $this->getPrice();
+
             case 4:
-                return $this->getRole();
+                return $this->getStock();
 
             case 5:
-                return $this->getCreatedAt();
+                return $this->getStatus();
 
             case 6:
+                return $this->getCreatedAt();
+
+            case 7:
                 return $this->getUpdatedAt();
 
             default:
@@ -1097,26 +1145,27 @@ abstract class User implements ActiveRecordInterface
      */
     public function toArray(string $keyType = TableMap::TYPE_PHPNAME, bool $includeLazyLoadColumns = true, array $alreadyDumpedObjects = [], bool $includeForeignObjects = false): array
     {
-        if (isset($alreadyDumpedObjects['User'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['Product'][$this->hashCode()])) {
             return ['*RECURSION*'];
         }
-        $alreadyDumpedObjects['User'][$this->hashCode()] = true;
-        $keys = UserTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['Product'][$this->hashCode()] = true;
+        $keys = ProductTableMap::getFieldNames($keyType);
         $result = [
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getEmail(),
-            $keys[2] => $this->getPassword(),
-            $keys[3] => $this->getName(),
-            $keys[4] => $this->getRole(),
-            $keys[5] => $this->getCreatedAt(),
-            $keys[6] => $this->getUpdatedAt(),
+            $keys[1] => $this->getName(),
+            $keys[2] => $this->getDescription(),
+            $keys[3] => $this->getPrice(),
+            $keys[4] => $this->getStock(),
+            $keys[5] => $this->getStatus(),
+            $keys[6] => $this->getCreatedAt(),
+            $keys[7] => $this->getUpdatedAt(),
         ];
-        if ($result[$keys[5]] instanceof \DateTimeInterface) {
-            $result[$keys[5]] = $result[$keys[5]]->format('Y-m-d H:i:s.u');
-        }
-
         if ($result[$keys[6]] instanceof \DateTimeInterface) {
             $result[$keys[6]] = $result[$keys[6]]->format('Y-m-d H:i:s.u');
+        }
+
+        if ($result[$keys[7]] instanceof \DateTimeInterface) {
+            $result[$keys[7]] = $result[$keys[7]]->format('Y-m-d H:i:s.u');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1158,7 +1207,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function setByName(string $name, $value, string $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = ProductTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         $this->setByPosition($pos, $value);
 
@@ -1180,25 +1229,28 @@ abstract class User implements ActiveRecordInterface
                 $this->setId($value);
                 break;
             case 1:
-                $this->setEmail($value);
-                break;
-            case 2:
-                $this->setPassword($value);
-                break;
-            case 3:
                 $this->setName($value);
                 break;
+            case 2:
+                $this->setDescription($value);
+                break;
+            case 3:
+                $this->setPrice($value);
+                break;
             case 4:
-                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+                $this->setStock($value);
+                break;
+            case 5:
+                $valueSet = ProductTableMap::getValueSet(ProductTableMap::COL_STATUS);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
-                $this->setRole($value);
-                break;
-            case 5:
-                $this->setCreatedAt($value);
+                $this->setStatus($value);
                 break;
             case 6:
+                $this->setCreatedAt($value);
+                break;
+            case 7:
                 $this->setUpdatedAt($value);
                 break;
         } // switch()
@@ -1225,28 +1277,31 @@ abstract class User implements ActiveRecordInterface
      */
     public function fromArray(array $arr, string $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = UserTableMap::getFieldNames($keyType);
+        $keys = ProductTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setEmail($arr[$keys[1]]);
+            $this->setName($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setPassword($arr[$keys[2]]);
+            $this->setDescription($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setName($arr[$keys[3]]);
+            $this->setPrice($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setRole($arr[$keys[4]]);
+            $this->setStock($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setCreatedAt($arr[$keys[5]]);
+            $this->setStatus($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setUpdatedAt($arr[$keys[6]]);
+            $this->setCreatedAt($arr[$keys[6]]);
+        }
+        if (array_key_exists($keys[7], $arr)) {
+            $this->setUpdatedAt($arr[$keys[7]]);
         }
 
         return $this;
@@ -1289,28 +1344,31 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildCriteria(): Criteria
     {
-        $criteria = new Criteria(UserTableMap::DATABASE_NAME);
+        $criteria = new Criteria(ProductTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserTableMap::COL_ID)) {
-            $criteria->add(UserTableMap::COL_ID, $this->id);
+        if ($this->isColumnModified(ProductTableMap::COL_ID)) {
+            $criteria->add(ProductTableMap::COL_ID, $this->id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $criteria->add(UserTableMap::COL_EMAIL, $this->email);
+        if ($this->isColumnModified(ProductTableMap::COL_NAME)) {
+            $criteria->add(ProductTableMap::COL_NAME, $this->name);
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $criteria->add(UserTableMap::COL_PASSWORD, $this->password);
+        if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
+            $criteria->add(ProductTableMap::COL_DESCRIPTION, $this->description);
         }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
-            $criteria->add(UserTableMap::COL_NAME, $this->name);
+        if ($this->isColumnModified(ProductTableMap::COL_PRICE)) {
+            $criteria->add(ProductTableMap::COL_PRICE, $this->price);
         }
-        if ($this->isColumnModified(UserTableMap::COL_ROLE)) {
-            $criteria->add(UserTableMap::COL_ROLE, $this->role);
+        if ($this->isColumnModified(ProductTableMap::COL_STOCK)) {
+            $criteria->add(ProductTableMap::COL_STOCK, $this->stock);
         }
-        if ($this->isColumnModified(UserTableMap::COL_CREATED_AT)) {
-            $criteria->add(UserTableMap::COL_CREATED_AT, $this->created_at);
+        if ($this->isColumnModified(ProductTableMap::COL_STATUS)) {
+            $criteria->add(ProductTableMap::COL_STATUS, $this->status);
         }
-        if ($this->isColumnModified(UserTableMap::COL_UPDATED_AT)) {
-            $criteria->add(UserTableMap::COL_UPDATED_AT, $this->updated_at);
+        if ($this->isColumnModified(ProductTableMap::COL_CREATED_AT)) {
+            $criteria->add(ProductTableMap::COL_CREATED_AT, $this->created_at);
+        }
+        if ($this->isColumnModified(ProductTableMap::COL_UPDATED_AT)) {
+            $criteria->add(ProductTableMap::COL_UPDATED_AT, $this->updated_at);
         }
 
         return $criteria;
@@ -1328,8 +1386,8 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildPkeyCriteria(): Criteria
     {
-        $criteria = ChildUserQuery::create();
-        $criteria->add(UserTableMap::COL_ID, $this->id);
+        $criteria = ChildProductQuery::create();
+        $criteria->add(ProductTableMap::COL_ID, $this->id);
 
         return $criteria;
     }
@@ -1392,7 +1450,7 @@ abstract class User implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param object $copyObj An object of \App\Models\User (or compatible) type.
+     * @param object $copyObj An object of \App\Models\Product (or compatible) type.
      * @param bool $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param bool $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws \Propel\Runtime\Exception\PropelException
@@ -1400,10 +1458,11 @@ abstract class User implements ActiveRecordInterface
      */
     public function copyInto(object $copyObj, bool $deepCopy = false, bool $makeNew = true): void
     {
-        $copyObj->setEmail($this->getEmail());
-        $copyObj->setPassword($this->getPassword());
         $copyObj->setName($this->getName());
-        $copyObj->setRole($this->getRole());
+        $copyObj->setDescription($this->getDescription());
+        $copyObj->setPrice($this->getPrice());
+        $copyObj->setStock($this->getStock());
+        $copyObj->setStatus($this->getStatus());
         $copyObj->setCreatedAt($this->getCreatedAt());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
 
@@ -1435,7 +1494,7 @@ abstract class User implements ActiveRecordInterface
      * objects.
      *
      * @param bool $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \App\Models\User Clone of current object.
+     * @return \App\Models\Product Clone of current object.
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function copy(bool $deepCopy = false)
@@ -1521,7 +1580,7 @@ abstract class User implements ActiveRecordInterface
      * If the $criteria is not null, it is used to always fetch the results from the database.
      * Otherwise the results are fetched from the database the first time, then cached.
      * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
+     * If this ChildProduct is new, it will return
      * an empty collection or the current collection; the criteria is ignored on a new object.
      *
      * @param Criteria $criteria optional Criteria object to narrow the query
@@ -1548,7 +1607,7 @@ abstract class User implements ActiveRecordInterface
                 }
             } else {
                 $collOrders = ChildOrderQuery::create(null, $criteria)
-                    ->filterByUser($this)
+                    ->filterByProduct($this)
                     ->find($con);
 
                 if (null !== $criteria) {
@@ -1602,7 +1661,7 @@ abstract class User implements ActiveRecordInterface
         $this->ordersScheduledForDeletion = $ordersToDelete;
 
         foreach ($ordersToDelete as $orderRemoved) {
-            $orderRemoved->setUser(null);
+            $orderRemoved->setProduct(null);
         }
 
         $this->collOrders = null;
@@ -1643,7 +1702,7 @@ abstract class User implements ActiveRecordInterface
             }
 
             return $query
-                ->filterByUser($this)
+                ->filterByProduct($this)
                 ->count($con);
         }
 
@@ -1681,7 +1740,7 @@ abstract class User implements ActiveRecordInterface
     protected function doAddOrder(ChildOrder $order): void
     {
         $this->collOrders[]= $order;
-        $order->setUser($this);
+        $order->setProduct($this);
     }
 
     /**
@@ -1698,7 +1757,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ordersScheduledForDeletion->clear();
             }
             $this->ordersScheduledForDeletion[]= clone $order;
-            $order->setUser(null);
+            $order->setProduct(null);
         }
 
         return $this;
@@ -1708,13 +1767,13 @@ abstract class User implements ActiveRecordInterface
     /**
      * If this collection has already been initialized with
      * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
+     * Otherwise if this Product is new, it will return
+     * an empty collection; or if this Product has previously
      * been saved, it will retrieve related Orders from storage.
      *
      * This method is protected by default in order to keep the public
      * api reasonable.  You can provide public methods for those you
-     * actually need in User.
+     * actually need in Product.
      *
      * @param Criteria $criteria optional Criteria object to narrow the query
      * @param ConnectionInterface $con optional connection object
@@ -1722,10 +1781,10 @@ abstract class User implements ActiveRecordInterface
      * @return ObjectCollection|ChildOrder[] List of ChildOrder objects
      * @phpstan-return ObjectCollection&\Traversable<ChildOrder}> List of ChildOrder objects
      */
-    public function getOrdersJoinProduct(?Criteria $criteria = null, ?ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getOrdersJoinUser(?Criteria $criteria = null, ?ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildOrderQuery::create(null, $criteria);
-        $query->joinWith('Product', $joinBehavior);
+        $query->joinWith('User', $joinBehavior);
 
         return $this->getOrders($query, $con);
     }
@@ -1740,10 +1799,11 @@ abstract class User implements ActiveRecordInterface
     public function clear()
     {
         $this->id = null;
-        $this->email = null;
-        $this->password = null;
         $this->name = null;
-        $this->role = null;
+        $this->description = null;
+        $this->price = null;
+        $this->stock = null;
+        $this->status = null;
         $this->created_at = null;
         $this->updated_at = null;
         $this->alreadyInSave = false;
@@ -1786,7 +1846,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(UserTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(ProductTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**

@@ -4,9 +4,9 @@ namespace App\Models\Base;
 
 use \Exception;
 use \PDO;
-use App\Models\User as ChildUser;
-use App\Models\UserQuery as ChildUserQuery;
-use App\Models\Map\UserTableMap;
+use App\Models\Product as ChildProduct;
+use App\Models\ProductQuery as ChildProductQuery;
+use App\Models\Map\ProductTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -17,117 +17,123 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 
 /**
- * Base class that represents a query for the `users` table.
+ * Base class that represents a query for the `products` table.
  *
- * @method     ChildUserQuery orderById($order = Criteria::ASC) Order by the id column
- * @method     ChildUserQuery orderByEmail($order = Criteria::ASC) Order by the email column
- * @method     ChildUserQuery orderByPassword($order = Criteria::ASC) Order by the password column
- * @method     ChildUserQuery orderByName($order = Criteria::ASC) Order by the name column
- * @method     ChildUserQuery orderByRole($order = Criteria::ASC) Order by the role column
- * @method     ChildUserQuery orderByCreatedAt($order = Criteria::ASC) Order by the created_at column
- * @method     ChildUserQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
+ * @method     ChildProductQuery orderById($order = Criteria::ASC) Order by the id column
+ * @method     ChildProductQuery orderByName($order = Criteria::ASC) Order by the name column
+ * @method     ChildProductQuery orderByDescription($order = Criteria::ASC) Order by the description column
+ * @method     ChildProductQuery orderByPrice($order = Criteria::ASC) Order by the price column
+ * @method     ChildProductQuery orderByStock($order = Criteria::ASC) Order by the stock column
+ * @method     ChildProductQuery orderByStatus($order = Criteria::ASC) Order by the status column
+ * @method     ChildProductQuery orderByCreatedAt($order = Criteria::ASC) Order by the created_at column
+ * @method     ChildProductQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
  *
- * @method     ChildUserQuery groupById() Group by the id column
- * @method     ChildUserQuery groupByEmail() Group by the email column
- * @method     ChildUserQuery groupByPassword() Group by the password column
- * @method     ChildUserQuery groupByName() Group by the name column
- * @method     ChildUserQuery groupByRole() Group by the role column
- * @method     ChildUserQuery groupByCreatedAt() Group by the created_at column
- * @method     ChildUserQuery groupByUpdatedAt() Group by the updated_at column
+ * @method     ChildProductQuery groupById() Group by the id column
+ * @method     ChildProductQuery groupByName() Group by the name column
+ * @method     ChildProductQuery groupByDescription() Group by the description column
+ * @method     ChildProductQuery groupByPrice() Group by the price column
+ * @method     ChildProductQuery groupByStock() Group by the stock column
+ * @method     ChildProductQuery groupByStatus() Group by the status column
+ * @method     ChildProductQuery groupByCreatedAt() Group by the created_at column
+ * @method     ChildProductQuery groupByUpdatedAt() Group by the updated_at column
  *
- * @method     ChildUserQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method     ChildUserQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method     ChildUserQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method     ChildProductQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method     ChildProductQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method     ChildProductQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method     ChildUserQuery leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
- * @method     ChildUserQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
- * @method     ChildUserQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
+ * @method     ChildProductQuery leftJoinWith($relation) Adds a LEFT JOIN clause and with to the query
+ * @method     ChildProductQuery rightJoinWith($relation) Adds a RIGHT JOIN clause and with to the query
+ * @method     ChildProductQuery innerJoinWith($relation) Adds a INNER JOIN clause and with to the query
  *
- * @method     ChildUserQuery leftJoinOrder($relationAlias = null) Adds a LEFT JOIN clause to the query using the Order relation
- * @method     ChildUserQuery rightJoinOrder($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Order relation
- * @method     ChildUserQuery innerJoinOrder($relationAlias = null) Adds a INNER JOIN clause to the query using the Order relation
+ * @method     ChildProductQuery leftJoinOrder($relationAlias = null) Adds a LEFT JOIN clause to the query using the Order relation
+ * @method     ChildProductQuery rightJoinOrder($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Order relation
+ * @method     ChildProductQuery innerJoinOrder($relationAlias = null) Adds a INNER JOIN clause to the query using the Order relation
  *
- * @method     ChildUserQuery joinWithOrder($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the Order relation
+ * @method     ChildProductQuery joinWithOrder($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the Order relation
  *
- * @method     ChildUserQuery leftJoinWithOrder() Adds a LEFT JOIN clause and with to the query using the Order relation
- * @method     ChildUserQuery rightJoinWithOrder() Adds a RIGHT JOIN clause and with to the query using the Order relation
- * @method     ChildUserQuery innerJoinWithOrder() Adds a INNER JOIN clause and with to the query using the Order relation
+ * @method     ChildProductQuery leftJoinWithOrder() Adds a LEFT JOIN clause and with to the query using the Order relation
+ * @method     ChildProductQuery rightJoinWithOrder() Adds a RIGHT JOIN clause and with to the query using the Order relation
+ * @method     ChildProductQuery innerJoinWithOrder() Adds a INNER JOIN clause and with to the query using the Order relation
  *
  * @method     \App\Models\OrderQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUser|null findOne(?ConnectionInterface $con = null) Return the first ChildUser matching the query
- * @method     ChildUser findOneOrCreate(?ConnectionInterface $con = null) Return the first ChildUser matching the query, or a new ChildUser object populated from the query conditions when no match is found
+ * @method     ChildProduct|null findOne(?ConnectionInterface $con = null) Return the first ChildProduct matching the query
+ * @method     ChildProduct findOneOrCreate(?ConnectionInterface $con = null) Return the first ChildProduct matching the query, or a new ChildProduct object populated from the query conditions when no match is found
  *
- * @method     ChildUser|null findOneById(int $id) Return the first ChildUser filtered by the id column
- * @method     ChildUser|null findOneByEmail(string $email) Return the first ChildUser filtered by the email column
- * @method     ChildUser|null findOneByPassword(string $password) Return the first ChildUser filtered by the password column
- * @method     ChildUser|null findOneByName(string $name) Return the first ChildUser filtered by the name column
- * @method     ChildUser|null findOneByRole(int $role) Return the first ChildUser filtered by the role column
- * @method     ChildUser|null findOneByCreatedAt(string $created_at) Return the first ChildUser filtered by the created_at column
- * @method     ChildUser|null findOneByUpdatedAt(string $updated_at) Return the first ChildUser filtered by the updated_at column
+ * @method     ChildProduct|null findOneById(int $id) Return the first ChildProduct filtered by the id column
+ * @method     ChildProduct|null findOneByName(string $name) Return the first ChildProduct filtered by the name column
+ * @method     ChildProduct|null findOneByDescription(string $description) Return the first ChildProduct filtered by the description column
+ * @method     ChildProduct|null findOneByPrice(string $price) Return the first ChildProduct filtered by the price column
+ * @method     ChildProduct|null findOneByStock(int $stock) Return the first ChildProduct filtered by the stock column
+ * @method     ChildProduct|null findOneByStatus(int $status) Return the first ChildProduct filtered by the status column
+ * @method     ChildProduct|null findOneByCreatedAt(string $created_at) Return the first ChildProduct filtered by the created_at column
+ * @method     ChildProduct|null findOneByUpdatedAt(string $updated_at) Return the first ChildProduct filtered by the updated_at column
  *
- * @method     ChildUser requirePk($key, ?ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOne(?ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requirePk($key, ?ConnectionInterface $con = null) Return the ChildProduct by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOne(?ConnectionInterface $con = null) Return the first ChildProduct matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildUser requireOneById(int $id) Return the first ChildUser filtered by the id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByEmail(string $email) Return the first ChildUser filtered by the email column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByPassword(string $password) Return the first ChildUser filtered by the password column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByName(string $name) Return the first ChildUser filtered by the name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByRole(int $role) Return the first ChildUser filtered by the role column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByCreatedAt(string $created_at) Return the first ChildUser filtered by the created_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneByUpdatedAt(string $updated_at) Return the first ChildUser filtered by the updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneById(int $id) Return the first ChildProduct filtered by the id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByName(string $name) Return the first ChildProduct filtered by the name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByDescription(string $description) Return the first ChildProduct filtered by the description column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByPrice(string $price) Return the first ChildProduct filtered by the price column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByStock(int $stock) Return the first ChildProduct filtered by the stock column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByStatus(int $status) Return the first ChildProduct filtered by the status column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByCreatedAt(string $created_at) Return the first ChildProduct filtered by the created_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByUpdatedAt(string $updated_at) Return the first ChildProduct filtered by the updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildUser[]|Collection find(?ConnectionInterface $con = null) Return ChildUser objects based on current ModelCriteria
- * @psalm-method Collection&\Traversable<ChildUser> find(?ConnectionInterface $con = null) Return ChildUser objects based on current ModelCriteria
+ * @method     ChildProduct[]|Collection find(?ConnectionInterface $con = null) Return ChildProduct objects based on current ModelCriteria
+ * @psalm-method Collection&\Traversable<ChildProduct> find(?ConnectionInterface $con = null) Return ChildProduct objects based on current ModelCriteria
  *
- * @method     ChildUser[]|Collection findById(int|array<int> $id) Return ChildUser objects filtered by the id column
- * @psalm-method Collection&\Traversable<ChildUser> findById(int|array<int> $id) Return ChildUser objects filtered by the id column
- * @method     ChildUser[]|Collection findByEmail(string|array<string> $email) Return ChildUser objects filtered by the email column
- * @psalm-method Collection&\Traversable<ChildUser> findByEmail(string|array<string> $email) Return ChildUser objects filtered by the email column
- * @method     ChildUser[]|Collection findByPassword(string|array<string> $password) Return ChildUser objects filtered by the password column
- * @psalm-method Collection&\Traversable<ChildUser> findByPassword(string|array<string> $password) Return ChildUser objects filtered by the password column
- * @method     ChildUser[]|Collection findByName(string|array<string> $name) Return ChildUser objects filtered by the name column
- * @psalm-method Collection&\Traversable<ChildUser> findByName(string|array<string> $name) Return ChildUser objects filtered by the name column
- * @method     ChildUser[]|Collection findByRole(int|array<int> $role) Return ChildUser objects filtered by the role column
- * @psalm-method Collection&\Traversable<ChildUser> findByRole(int|array<int> $role) Return ChildUser objects filtered by the role column
- * @method     ChildUser[]|Collection findByCreatedAt(string|array<string> $created_at) Return ChildUser objects filtered by the created_at column
- * @psalm-method Collection&\Traversable<ChildUser> findByCreatedAt(string|array<string> $created_at) Return ChildUser objects filtered by the created_at column
- * @method     ChildUser[]|Collection findByUpdatedAt(string|array<string> $updated_at) Return ChildUser objects filtered by the updated_at column
- * @psalm-method Collection&\Traversable<ChildUser> findByUpdatedAt(string|array<string> $updated_at) Return ChildUser objects filtered by the updated_at column
+ * @method     ChildProduct[]|Collection findById(int|array<int> $id) Return ChildProduct objects filtered by the id column
+ * @psalm-method Collection&\Traversable<ChildProduct> findById(int|array<int> $id) Return ChildProduct objects filtered by the id column
+ * @method     ChildProduct[]|Collection findByName(string|array<string> $name) Return ChildProduct objects filtered by the name column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByName(string|array<string> $name) Return ChildProduct objects filtered by the name column
+ * @method     ChildProduct[]|Collection findByDescription(string|array<string> $description) Return ChildProduct objects filtered by the description column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByDescription(string|array<string> $description) Return ChildProduct objects filtered by the description column
+ * @method     ChildProduct[]|Collection findByPrice(string|array<string> $price) Return ChildProduct objects filtered by the price column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByPrice(string|array<string> $price) Return ChildProduct objects filtered by the price column
+ * @method     ChildProduct[]|Collection findByStock(int|array<int> $stock) Return ChildProduct objects filtered by the stock column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByStock(int|array<int> $stock) Return ChildProduct objects filtered by the stock column
+ * @method     ChildProduct[]|Collection findByStatus(int|array<int> $status) Return ChildProduct objects filtered by the status column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByStatus(int|array<int> $status) Return ChildProduct objects filtered by the status column
+ * @method     ChildProduct[]|Collection findByCreatedAt(string|array<string> $created_at) Return ChildProduct objects filtered by the created_at column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByCreatedAt(string|array<string> $created_at) Return ChildProduct objects filtered by the created_at column
+ * @method     ChildProduct[]|Collection findByUpdatedAt(string|array<string> $updated_at) Return ChildProduct objects filtered by the updated_at column
+ * @psalm-method Collection&\Traversable<ChildProduct> findByUpdatedAt(string|array<string> $updated_at) Return ChildProduct objects filtered by the updated_at column
  *
- * @method     ChildUser[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ?ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
- * @psalm-method \Propel\Runtime\Util\PropelModelPager&\Traversable<ChildUser> paginate($page = 1, $maxPerPage = 10, ?ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
+ * @method     ChildProduct[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ?ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
+ * @psalm-method \Propel\Runtime\Util\PropelModelPager&\Traversable<ChildProduct> paginate($page = 1, $maxPerPage = 10, ?ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  */
-abstract class UserQuery extends ModelCriteria
+abstract class ProductQuery extends ModelCriteria
 {
     protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
-     * Initializes internal state of \App\Models\Base\UserQuery object.
+     * Initializes internal state of \App\Models\Base\ProductQuery object.
      *
      * @param string $dbName The database name
      * @param string $modelName The phpName of a model, e.g. 'Book'
      * @param string $modelAlias The alias for the model in this query, e.g. 'b'
      */
-    public function __construct($dbName = 'default', $modelName = '\\App\\Models\\User', $modelAlias = null)
+    public function __construct($dbName = 'default', $modelName = '\\App\\Models\\Product', $modelAlias = null)
     {
         parent::__construct($dbName, $modelName, $modelAlias);
     }
 
     /**
-     * Returns a new ChildUserQuery object.
+     * Returns a new ChildProductQuery object.
      *
      * @param string $modelAlias The alias of a model in the query
      * @param Criteria $criteria Optional Criteria to build the query from
      *
-     * @return ChildUserQuery
+     * @return ChildProductQuery
      */
     public static function create(?string $modelAlias = null, ?Criteria $criteria = null): Criteria
     {
-        if ($criteria instanceof ChildUserQuery) {
+        if ($criteria instanceof ChildProductQuery) {
             return $criteria;
         }
-        $query = new ChildUserQuery();
+        $query = new ChildProductQuery();
         if (null !== $modelAlias) {
             $query->setModelAlias($modelAlias);
         }
@@ -150,7 +156,7 @@ abstract class UserQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
-     * @return ChildUser|array|mixed the result, formatted by the current formatter
+     * @return ChildProduct|array|mixed the result, formatted by the current formatter
      */
     public function findPk($key, ?ConnectionInterface $con = null)
     {
@@ -159,7 +165,7 @@ abstract class UserQuery extends ModelCriteria
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(ProductTableMap::DATABASE_NAME);
         }
 
         $this->basePreSelect($con);
@@ -172,7 +178,7 @@ abstract class UserQuery extends ModelCriteria
             return $this->findPkComplex($key, $con);
         }
 
-        if ((null !== ($obj = UserTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+        if ((null !== ($obj = ProductTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
             // the object is already in the instance pool
             return $obj;
         }
@@ -189,11 +195,11 @@ abstract class UserQuery extends ModelCriteria
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return ChildUser A model object, or null if the key is not found
+     * @return ChildProduct A model object, or null if the key is not found
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT id, email, password, name, role, created_at, updated_at FROM users WHERE id = :p0';
+        $sql = 'SELECT id, name, description, price, stock, status, created_at, updated_at FROM products WHERE id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -204,10 +210,10 @@ abstract class UserQuery extends ModelCriteria
         }
         $obj = null;
         if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
-            /** @var ChildUser $obj */
-            $obj = new ChildUser();
+            /** @var ChildProduct $obj */
+            $obj = new ChildProduct();
             $obj->hydrate($row);
-            UserTableMap::addInstanceToPool($obj, null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key);
+            ProductTableMap::addInstanceToPool($obj, null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key);
         }
         $stmt->closeCursor();
 
@@ -220,7 +226,7 @@ abstract class UserQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param ConnectionInterface $con A connection object
      *
-     * @return ChildUser|array|mixed the result, formatted by the current formatter
+     * @return ChildProduct|array|mixed the result, formatted by the current formatter
      */
     protected function findPkComplex($key, ConnectionInterface $con)
     {
@@ -267,7 +273,7 @@ abstract class UserQuery extends ModelCriteria
     public function filterByPrimaryKey($key)
     {
 
-        $this->addUsingAlias(UserTableMap::COL_ID, $key, Criteria::EQUAL);
+        $this->addUsingAlias(ProductTableMap::COL_ID, $key, Criteria::EQUAL);
 
         return $this;
     }
@@ -282,7 +288,7 @@ abstract class UserQuery extends ModelCriteria
     public function filterByPrimaryKeys($keys)
     {
 
-        $this->addUsingAlias(UserTableMap::COL_ID, $keys, Criteria::IN);
+        $this->addUsingAlias(ProductTableMap::COL_ID, $keys, Criteria::IN);
 
         return $this;
     }
@@ -310,11 +316,11 @@ abstract class UserQuery extends ModelCriteria
         if (is_array($id)) {
             $useMinMax = false;
             if (isset($id['min'])) {
-                $this->addUsingAlias(UserTableMap::COL_ID, $id['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_ID, $id['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($id['max'])) {
-                $this->addUsingAlias(UserTableMap::COL_ID, $id['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_ID, $id['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -325,63 +331,7 @@ abstract class UserQuery extends ModelCriteria
             }
         }
 
-        $this->addUsingAlias(UserTableMap::COL_ID, $id, $comparison);
-
-        return $this;
-    }
-
-    /**
-     * Filter the query on the email column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByEmail('fooValue');   // WHERE email = 'fooValue'
-     * $query->filterByEmail('%fooValue%', Criteria::LIKE); // WHERE email LIKE '%fooValue%'
-     * $query->filterByEmail(['foo', 'bar']); // WHERE email IN ('foo', 'bar')
-     * </code>
-     *
-     * @param string|string[] $email The value to use as filter.
-     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this The current query, for fluid interface
-     */
-    public function filterByEmail($email = null, ?string $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($email)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        $this->addUsingAlias(UserTableMap::COL_EMAIL, $email, $comparison);
-
-        return $this;
-    }
-
-    /**
-     * Filter the query on the password column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByPassword('fooValue');   // WHERE password = 'fooValue'
-     * $query->filterByPassword('%fooValue%', Criteria::LIKE); // WHERE password LIKE '%fooValue%'
-     * $query->filterByPassword(['foo', 'bar']); // WHERE password IN ('foo', 'bar')
-     * </code>
-     *
-     * @param string|string[] $password The value to use as filter.
-     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this The current query, for fluid interface
-     */
-    public function filterByPassword($password = null, ?string $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($password)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        $this->addUsingAlias(UserTableMap::COL_PASSWORD, $password, $comparison);
+        $this->addUsingAlias(ProductTableMap::COL_ID, $id, $comparison);
 
         return $this;
     }
@@ -409,42 +359,156 @@ abstract class UserQuery extends ModelCriteria
             }
         }
 
-        $this->addUsingAlias(UserTableMap::COL_NAME, $name, $comparison);
+        $this->addUsingAlias(ProductTableMap::COL_NAME, $name, $comparison);
 
         return $this;
     }
 
     /**
-     * Filter the query on the role column
+     * Filter the query on the description column
      *
-     * @param mixed $role The value to use as filter
+     * Example usage:
+     * <code>
+     * $query->filterByDescription('fooValue');   // WHERE description = 'fooValue'
+     * $query->filterByDescription('%fooValue%', Criteria::LIKE); // WHERE description LIKE '%fooValue%'
+     * $query->filterByDescription(['foo', 'bar']); // WHERE description IN ('foo', 'bar')
+     * </code>
+     *
+     * @param string|string[] $description The value to use as filter.
      * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this The current query, for fluid interface
      */
-    public function filterByRole($role = null, ?string $comparison = null)
+    public function filterByDescription($description = null, ?string $comparison = null)
     {
-        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-        if (is_scalar($role)) {
-            if (!in_array($role, $valueSet)) {
-                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $role));
+        if (null === $comparison) {
+            if (is_array($description)) {
+                $comparison = Criteria::IN;
             }
-            $role = array_search($role, $valueSet);
-        } elseif (is_array($role)) {
-            $convertedValues = [];
-            foreach ($role as $value) {
-                if (!in_array($value, $valueSet)) {
-                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
-                }
-                $convertedValues []= array_search($value, $valueSet);
+        }
+
+        $this->addUsingAlias(ProductTableMap::COL_DESCRIPTION, $description, $comparison);
+
+        return $this;
+    }
+
+    /**
+     * Filter the query on the price column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByPrice(1234); // WHERE price = 1234
+     * $query->filterByPrice(array(12, 34)); // WHERE price IN (12, 34)
+     * $query->filterByPrice(array('min' => 12)); // WHERE price > 12
+     * </code>
+     *
+     * @param mixed $price The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this The current query, for fluid interface
+     */
+    public function filterByPrice($price = null, ?string $comparison = null)
+    {
+        if (is_array($price)) {
+            $useMinMax = false;
+            if (isset($price['min'])) {
+                $this->addUsingAlias(ProductTableMap::COL_PRICE, $price['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
             }
-            $role = $convertedValues;
+            if (isset($price['max'])) {
+                $this->addUsingAlias(ProductTableMap::COL_PRICE, $price['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
         }
 
-        $this->addUsingAlias(UserTableMap::COL_ROLE, $role, $comparison);
+        $this->addUsingAlias(ProductTableMap::COL_PRICE, $price, $comparison);
+
+        return $this;
+    }
+
+    /**
+     * Filter the query on the stock column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByStock(1234); // WHERE stock = 1234
+     * $query->filterByStock(array(12, 34)); // WHERE stock IN (12, 34)
+     * $query->filterByStock(array('min' => 12)); // WHERE stock > 12
+     * </code>
+     *
+     * @param mixed $stock The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this The current query, for fluid interface
+     */
+    public function filterByStock($stock = null, ?string $comparison = null)
+    {
+        if (is_array($stock)) {
+            $useMinMax = false;
+            if (isset($stock['min'])) {
+                $this->addUsingAlias(ProductTableMap::COL_STOCK, $stock['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($stock['max'])) {
+                $this->addUsingAlias(ProductTableMap::COL_STOCK, $stock['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        $this->addUsingAlias(ProductTableMap::COL_STOCK, $stock, $comparison);
+
+        return $this;
+    }
+
+    /**
+     * Filter the query on the status column
+     *
+     * @param mixed $status The value to use as filter
+     * @param string|null $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this The current query, for fluid interface
+     */
+    public function filterByStatus($status = null, ?string $comparison = null)
+    {
+        $valueSet = ProductTableMap::getValueSet(ProductTableMap::COL_STATUS);
+        if (is_scalar($status)) {
+            if (!in_array($status, $valueSet)) {
+                throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $status));
+            }
+            $status = array_search($status, $valueSet);
+        } elseif (is_array($status)) {
+            $convertedValues = [];
+            foreach ($status as $value) {
+                if (!in_array($value, $valueSet)) {
+                    throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $value));
+                }
+                $convertedValues []= array_search($value, $valueSet);
+            }
+            $status = $convertedValues;
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        $this->addUsingAlias(ProductTableMap::COL_STATUS, $status, $comparison);
 
         return $this;
     }
@@ -474,11 +538,11 @@ abstract class UserQuery extends ModelCriteria
         if (is_array($createdAt)) {
             $useMinMax = false;
             if (isset($createdAt['min'])) {
-                $this->addUsingAlias(UserTableMap::COL_CREATED_AT, $createdAt['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_CREATED_AT, $createdAt['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($createdAt['max'])) {
-                $this->addUsingAlias(UserTableMap::COL_CREATED_AT, $createdAt['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_CREATED_AT, $createdAt['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -489,7 +553,7 @@ abstract class UserQuery extends ModelCriteria
             }
         }
 
-        $this->addUsingAlias(UserTableMap::COL_CREATED_AT, $createdAt, $comparison);
+        $this->addUsingAlias(ProductTableMap::COL_CREATED_AT, $createdAt, $comparison);
 
         return $this;
     }
@@ -519,11 +583,11 @@ abstract class UserQuery extends ModelCriteria
         if (is_array($updatedAt)) {
             $useMinMax = false;
             if (isset($updatedAt['min'])) {
-                $this->addUsingAlias(UserTableMap::COL_UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($updatedAt['max'])) {
-                $this->addUsingAlias(UserTableMap::COL_UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(ProductTableMap::COL_UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -534,7 +598,7 @@ abstract class UserQuery extends ModelCriteria
             }
         }
 
-        $this->addUsingAlias(UserTableMap::COL_UPDATED_AT, $updatedAt, $comparison);
+        $this->addUsingAlias(ProductTableMap::COL_UPDATED_AT, $updatedAt, $comparison);
 
         return $this;
     }
@@ -551,7 +615,7 @@ abstract class UserQuery extends ModelCriteria
     {
         if ($order instanceof \App\Models\Order) {
             $this
-                ->addUsingAlias(UserTableMap::COL_ID, $order->getUserId(), $comparison);
+                ->addUsingAlias(ProductTableMap::COL_ID, $order->getProductId(), $comparison);
 
             return $this;
         } elseif ($order instanceof ObjectCollection) {
@@ -715,21 +779,21 @@ abstract class UserQuery extends ModelCriteria
     /**
      * Exclude object from result
      *
-     * @param ChildUser $user Object to remove from the list of results
+     * @param ChildProduct $product Object to remove from the list of results
      *
      * @return $this The current query, for fluid interface
      */
-    public function prune($user = null)
+    public function prune($product = null)
     {
-        if ($user) {
-            $this->addUsingAlias(UserTableMap::COL_ID, $user->getId(), Criteria::NOT_EQUAL);
+        if ($product) {
+            $this->addUsingAlias(ProductTableMap::COL_ID, $product->getId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
     }
 
     /**
-     * Deletes all rows from the users table.
+     * Deletes all rows from the products table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
@@ -737,7 +801,7 @@ abstract class UserQuery extends ModelCriteria
     public function doDeleteAll(?ConnectionInterface $con = null): int
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(ProductTableMap::DATABASE_NAME);
         }
 
         // use transaction because $criteria could contain info
@@ -748,8 +812,8 @@ abstract class UserQuery extends ModelCriteria
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
-            UserTableMap::clearInstancePool();
-            UserTableMap::clearRelatedInstancePool();
+            ProductTableMap::clearInstancePool();
+            ProductTableMap::clearRelatedInstancePool();
 
             return $affectedRows;
         });
@@ -767,23 +831,23 @@ abstract class UserQuery extends ModelCriteria
     public function delete(?ConnectionInterface $con = null): int
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(ProductTableMap::DATABASE_NAME);
         }
 
         $criteria = $this;
 
         // Set the correct dbName
-        $criteria->setDbName(UserTableMap::DATABASE_NAME);
+        $criteria->setDbName(ProductTableMap::DATABASE_NAME);
 
         // use transaction because $criteria could contain info
         // for more than one table or we could emulating ON DELETE CASCADE, etc.
         return $con->transaction(function () use ($con, $criteria) {
             $affectedRows = 0; // initialize var to track total num of affected rows
 
-            UserTableMap::removeInstanceFromPool($criteria);
+            ProductTableMap::removeInstanceFromPool($criteria);
 
             $affectedRows += ModelCriteria::delete($con);
-            UserTableMap::clearRelatedInstancePool();
+            ProductTableMap::clearRelatedInstancePool();
 
             return $affectedRows;
         });

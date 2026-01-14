@@ -5,18 +5,17 @@ namespace App\Models\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
-use App\Models\Order as ChildOrder;
 use App\Models\OrderQuery as ChildOrderQuery;
+use App\Models\Product as ChildProduct;
+use App\Models\ProductQuery as ChildProductQuery;
 use App\Models\User as ChildUser;
 use App\Models\UserQuery as ChildUserQuery;
 use App\Models\Map\OrderTableMap;
-use App\Models\Map\UserTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -26,20 +25,20 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Util\PropelDateTime;
 
 /**
- * Base class that represents a row from the 'users' table.
+ * Base class that represents a row from the 'orders' table.
  *
  *
  *
  * @package    propel.generator.Models.Base
  */
-abstract class User implements ActiveRecordInterface
+abstract class Order implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      *
      * @var string
      */
-    public const TABLE_MAP = '\\App\\Models\\Map\\UserTableMap';
+    public const TABLE_MAP = '\\App\\Models\\Map\\OrderTableMap';
 
 
     /**
@@ -76,33 +75,40 @@ abstract class User implements ActiveRecordInterface
     protected $id;
 
     /**
-     * The value for the email field.
+     * The value for the user_id field.
+     *
+     * @var        int
+     */
+    protected $user_id;
+
+    /**
+     * The value for the product_id field.
+     *
+     * @var        int
+     */
+    protected $product_id;
+
+    /**
+     * The value for the quantity field.
+     *
+     * @var        int
+     */
+    protected $quantity;
+
+    /**
+     * The value for the total_price field.
      *
      * @var        string
      */
-    protected $email;
+    protected $total_price;
 
     /**
-     * The value for the password field.
-     *
-     * @var        string
-     */
-    protected $password;
-
-    /**
-     * The value for the name field.
-     *
-     * @var        string
-     */
-    protected $name;
-
-    /**
-     * The value for the role field.
+     * The value for the status field.
      *
      * Note: this column has a database default value of: 0
      * @var        int
      */
-    protected $role;
+    protected $status;
 
     /**
      * The value for the created_at field.
@@ -121,11 +127,14 @@ abstract class User implements ActiveRecordInterface
     protected $updated_at;
 
     /**
-     * @var        ObjectCollection|ChildOrder[] Collection to store aggregation of ChildOrder objects.
-     * @phpstan-var ObjectCollection&\Traversable<ChildOrder> Collection to store aggregation of ChildOrder objects.
+     * @var        ChildUser
      */
-    protected $collOrders;
-    protected $collOrdersPartial;
+    protected $aUser;
+
+    /**
+     * @var        ChildProduct
+     */
+    protected $aProduct;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -136,13 +145,6 @@ abstract class User implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildOrder[]
-     * @phpstan-var ObjectCollection&\Traversable<ChildOrder>
-     */
-    protected $ordersScheduledForDeletion = null;
-
-    /**
      * Applies default values to this object.
      * This method should be called from the object's constructor (or
      * equivalent initialization method).
@@ -150,11 +152,11 @@ abstract class User implements ActiveRecordInterface
      */
     public function applyDefaultValues(): void
     {
-        $this->role = 0;
+        $this->status = 0;
     }
 
     /**
-     * Initializes internal state of App\Models\Base\User object.
+     * Initializes internal state of App\Models\Base\Order object.
      * @see applyDefaults()
      */
     public function __construct()
@@ -249,9 +251,9 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>User</code> instance.  If
-     * <code>obj</code> is an instance of <code>User</code>, delegates to
-     * <code>equals(User)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>Order</code> instance.  If
+     * <code>obj</code> is an instance of <code>Order</code>, delegates to
+     * <code>equals(Order)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param mixed $obj The object to compare to.
      * @return bool Whether equal to the object specified.
@@ -392,52 +394,62 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [email] column value.
+     * Get the [user_id] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getEmail()
+    public function getUserId()
     {
-        return $this->email;
+        return $this->user_id;
     }
 
     /**
-     * Get the [password] column value.
+     * Get the [product_id] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getPassword()
+    public function getProductId()
     {
-        return $this->password;
+        return $this->product_id;
     }
 
     /**
-     * Get the [name] column value.
+     * Get the [quantity] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getName()
+    public function getQuantity()
     {
-        return $this->name;
+        return $this->quantity;
     }
 
     /**
-     * Get the [role] column value.
+     * Get the [total_price] column value.
+     *
+     * @return string
+     */
+    public function getTotalPrice()
+    {
+        return $this->total_price;
+    }
+
+    /**
+     * Get the [status] column value.
      *
      * @return string|null
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function getRole()
+    public function getStatus()
     {
-        if (null === $this->role) {
+        if (null === $this->status) {
             return null;
         }
-        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-        if (!isset($valueSet[$this->role])) {
-            throw new PropelException('Unknown stored enum key: ' . $this->role);
+        $valueSet = OrderTableMap::getValueSet(OrderTableMap::COL_STATUS);
+        if (!isset($valueSet[$this->status])) {
+            throw new PropelException('Unknown stored enum key: ' . $this->status);
         }
 
-        return $valueSet[$this->role];
+        return $valueSet[$this->status];
     }
 
     /**
@@ -498,92 +510,120 @@ abstract class User implements ActiveRecordInterface
 
         if ($this->id !== $v) {
             $this->id = $v;
-            $this->modifiedColumns[UserTableMap::COL_ID] = true;
+            $this->modifiedColumns[OrderTableMap::COL_ID] = true;
         }
 
         return $this;
     }
 
     /**
-     * Set the value of [email] column.
+     * Set the value of [user_id] column.
+     *
+     * @param int $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setUserId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->user_id !== $v) {
+            $this->user_id = $v;
+            $this->modifiedColumns[OrderTableMap::COL_USER_ID] = true;
+        }
+
+        if ($this->aUser !== null && $this->aUser->getId() !== $v) {
+            $this->aUser = null;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [product_id] column.
+     *
+     * @param int $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setProductId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->product_id !== $v) {
+            $this->product_id = $v;
+            $this->modifiedColumns[OrderTableMap::COL_PRODUCT_ID] = true;
+        }
+
+        if ($this->aProduct !== null && $this->aProduct->getId() !== $v) {
+            $this->aProduct = null;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [quantity] column.
+     *
+     * @param int $v New value
+     * @return $this The current object (for fluent API support)
+     */
+    public function setQuantity($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->quantity !== $v) {
+            $this->quantity = $v;
+            $this->modifiedColumns[OrderTableMap::COL_QUANTITY] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the value of [total_price] column.
      *
      * @param string $v New value
      * @return $this The current object (for fluent API support)
      */
-    public function setEmail($v)
+    public function setTotalPrice($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->email !== $v) {
-            $this->email = $v;
-            $this->modifiedColumns[UserTableMap::COL_EMAIL] = true;
+        if ($this->total_price !== $v) {
+            $this->total_price = $v;
+            $this->modifiedColumns[OrderTableMap::COL_TOTAL_PRICE] = true;
         }
 
         return $this;
     }
 
     /**
-     * Set the value of [password] column.
-     *
-     * @param string $v New value
-     * @return $this The current object (for fluent API support)
-     */
-    public function setPassword($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->password !== $v) {
-            $this->password = $v;
-            $this->modifiedColumns[UserTableMap::COL_PASSWORD] = true;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set the value of [name] column.
-     *
-     * @param string $v New value
-     * @return $this The current object (for fluent API support)
-     */
-    public function setName($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->name !== $v) {
-            $this->name = $v;
-            $this->modifiedColumns[UserTableMap::COL_NAME] = true;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set the value of [role] column.
+     * Set the value of [status] column.
      *
      * @param string $v new value
      * @return $this The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function setRole($v)
+    public function setStatus($v)
     {
         if ($v !== null) {
-            $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+            $valueSet = OrderTableMap::getValueSet(OrderTableMap::COL_STATUS);
             if (!in_array($v, $valueSet)) {
                 throw new PropelException(sprintf('Value "%s" is not accepted in this enumerated column', $v));
             }
             $v = array_search($v, $valueSet);
         }
 
-        if ($this->role !== $v) {
-            $this->role = $v;
-            $this->modifiedColumns[UserTableMap::COL_ROLE] = true;
+        if ($this->status !== $v) {
+            $this->status = $v;
+            $this->modifiedColumns[OrderTableMap::COL_STATUS] = true;
         }
 
         return $this;
@@ -602,7 +642,7 @@ abstract class User implements ActiveRecordInterface
         if ($this->created_at !== null || $dt !== null) {
             if ($this->created_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->created_at->format("Y-m-d H:i:s.u")) {
                 $this->created_at = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserTableMap::COL_CREATED_AT] = true;
+                $this->modifiedColumns[OrderTableMap::COL_CREATED_AT] = true;
             }
         } // if either are not null
 
@@ -622,7 +662,7 @@ abstract class User implements ActiveRecordInterface
         if ($this->updated_at !== null || $dt !== null) {
             if ($this->updated_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->updated_at->format("Y-m-d H:i:s.u")) {
                 $this->updated_at = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[UserTableMap::COL_UPDATED_AT] = true;
+                $this->modifiedColumns[OrderTableMap::COL_UPDATED_AT] = true;
             }
         } // if either are not null
 
@@ -639,7 +679,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues(): bool
     {
-            if ($this->role !== 0) {
+            if ($this->status !== 0) {
                 return false;
             }
 
@@ -669,36 +709,31 @@ abstract class User implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : OrderTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
             $this->id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('Email', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->email = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : OrderTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('Password', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->password = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : OrderTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->product_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Name', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->name = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : OrderTableMap::translateFieldName('Quantity', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->quantity = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('Role', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col !== null) {
-                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                $this->role = array_search($col, $valueSet, true);
-                if ($this->role === false) {
-                    $this->role = null;
-                }
-            } else {
-                $this->role = null;
-            }
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : OrderTableMap::translateFieldName('TotalPrice', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->total_price = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : OrderTableMap::translateFieldName('Status', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->status = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : OrderTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
             $this->created_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : OrderTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
                 $col = null;
             }
@@ -711,10 +746,10 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 8; // 8 = OrderTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\App\\Models\\User'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\App\\Models\\Order'), 0, $e);
         }
     }
 
@@ -734,6 +769,12 @@ abstract class User implements ActiveRecordInterface
      */
     public function ensureConsistency(): void
     {
+        if ($this->aUser !== null && $this->user_id !== $this->aUser->getId()) {
+            $this->aUser = null;
+        }
+        if ($this->aProduct !== null && $this->product_id !== $this->aProduct->getId()) {
+            $this->aProduct = null;
+        }
     }
 
     /**
@@ -757,13 +798,13 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(OrderTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildUserQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildOrderQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -773,8 +814,8 @@ abstract class User implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->collOrders = null;
-
+            $this->aUser = null;
+            $this->aProduct = null;
         } // if (deep)
     }
 
@@ -784,8 +825,8 @@ abstract class User implements ActiveRecordInterface
      * @param ConnectionInterface $con
      * @return void
      * @throws \Propel\Runtime\Exception\PropelException
-     * @see User::setDeleted()
-     * @see User::isDeleted()
+     * @see Order::setDeleted()
+     * @see Order::isDeleted()
      */
     public function delete(?ConnectionInterface $con = null): void
     {
@@ -794,11 +835,11 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(OrderTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildUserQuery::create()
+            $deleteQuery = ChildOrderQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -833,7 +874,7 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(OrderTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
@@ -852,7 +893,7 @@ abstract class User implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                UserTableMap::addInstanceToPool($this);
+                OrderTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -878,6 +919,25 @@ abstract class User implements ActiveRecordInterface
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
 
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aUser !== null) {
+                if ($this->aUser->isModified() || $this->aUser->isNew()) {
+                    $affectedRows += $this->aUser->save($con);
+                }
+                $this->setUser($this->aUser);
+            }
+
+            if ($this->aProduct !== null) {
+                if ($this->aProduct->isModified() || $this->aProduct->isNew()) {
+                    $affectedRows += $this->aProduct->save($con);
+                }
+                $this->setProduct($this->aProduct);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -887,23 +947,6 @@ abstract class User implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
-            }
-
-            if ($this->ordersScheduledForDeletion !== null) {
-                if (!$this->ordersScheduledForDeletion->isEmpty()) {
-                    \App\Models\OrderQuery::create()
-                        ->filterByPrimaryKeys($this->ordersScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->ordersScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collOrders !== null) {
-                foreach ($this->collOrders as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
             }
 
             $this->alreadyInSave = false;
@@ -926,33 +969,39 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = [];
         $index = 0;
 
+        $this->modifiedColumns[OrderTableMap::COL_ID] = true;
         if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserTableMap::COL_ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . OrderTableMap::COL_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        // Skip auto-increment primary key column
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $modifiedColumns[':p' . $index++]  = 'email';
+        if ($this->isColumnModified(OrderTableMap::COL_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $modifiedColumns[':p' . $index++]  = 'password';
+        if ($this->isColumnModified(OrderTableMap::COL_USER_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'name';
+        if ($this->isColumnModified(OrderTableMap::COL_PRODUCT_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'product_id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_ROLE)) {
-            $modifiedColumns[':p' . $index++]  = 'role';
+        if ($this->isColumnModified(OrderTableMap::COL_QUANTITY)) {
+            $modifiedColumns[':p' . $index++]  = 'quantity';
         }
-        if ($this->isColumnModified(UserTableMap::COL_CREATED_AT)) {
+        if ($this->isColumnModified(OrderTableMap::COL_TOTAL_PRICE)) {
+            $modifiedColumns[':p' . $index++]  = 'total_price';
+        }
+        if ($this->isColumnModified(OrderTableMap::COL_STATUS)) {
+            $modifiedColumns[':p' . $index++]  = 'status';
+        }
+        if ($this->isColumnModified(OrderTableMap::COL_CREATED_AT)) {
             $modifiedColumns[':p' . $index++]  = 'created_at';
         }
-        if ($this->isColumnModified(UserTableMap::COL_UPDATED_AT)) {
+        if ($this->isColumnModified(OrderTableMap::COL_UPDATED_AT)) {
             $modifiedColumns[':p' . $index++]  = 'updated_at';
         }
 
         $sql = sprintf(
-            'INSERT INTO users (%s) VALUES (%s)',
+            'INSERT INTO orders (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -965,23 +1014,24 @@ abstract class User implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
 
                         break;
-                    case 'email':
-                        $stmt->bindValue($identifier, $this->email, PDO::PARAM_STR);
+                    case 'user_id':
+                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
 
                         break;
-                    case 'password':
-                        $stmt->bindValue($identifier, $this->password, PDO::PARAM_STR);
+                    case 'product_id':
+                        $stmt->bindValue($identifier, $this->product_id, PDO::PARAM_INT);
 
                         break;
-                    case 'name':
-                        $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
+                    case 'quantity':
+                        $stmt->bindValue($identifier, $this->quantity, PDO::PARAM_INT);
 
                         break;
-                    case 'role':
-                        // Convert ENUM index to string value for database
-                        $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
-                        $roleValue = isset($valueSet[$this->role]) ? $valueSet[$this->role] : $this->role;
-                        $stmt->bindValue($identifier, $roleValue, PDO::PARAM_STR);
+                    case 'total_price':
+                        $stmt->bindValue($identifier, $this->total_price, PDO::PARAM_STR);
+
+                        break;
+                    case 'status':
+                        $stmt->bindValue($identifier, $this->status, PDO::PARAM_INT);
 
                         break;
                     case 'created_at':
@@ -1038,7 +1088,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function getByName(string $name, string $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = OrderTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -1058,21 +1108,24 @@ abstract class User implements ActiveRecordInterface
                 return $this->getId();
 
             case 1:
-                return $this->getEmail();
+                return $this->getUserId();
 
             case 2:
-                return $this->getPassword();
+                return $this->getProductId();
 
             case 3:
-                return $this->getName();
+                return $this->getQuantity();
 
             case 4:
-                return $this->getRole();
+                return $this->getTotalPrice();
 
             case 5:
-                return $this->getCreatedAt();
+                return $this->getStatus();
 
             case 6:
+                return $this->getCreatedAt();
+
+            case 7:
                 return $this->getUpdatedAt();
 
             default:
@@ -1097,26 +1150,27 @@ abstract class User implements ActiveRecordInterface
      */
     public function toArray(string $keyType = TableMap::TYPE_PHPNAME, bool $includeLazyLoadColumns = true, array $alreadyDumpedObjects = [], bool $includeForeignObjects = false): array
     {
-        if (isset($alreadyDumpedObjects['User'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['Order'][$this->hashCode()])) {
             return ['*RECURSION*'];
         }
-        $alreadyDumpedObjects['User'][$this->hashCode()] = true;
-        $keys = UserTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['Order'][$this->hashCode()] = true;
+        $keys = OrderTableMap::getFieldNames($keyType);
         $result = [
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getEmail(),
-            $keys[2] => $this->getPassword(),
-            $keys[3] => $this->getName(),
-            $keys[4] => $this->getRole(),
-            $keys[5] => $this->getCreatedAt(),
-            $keys[6] => $this->getUpdatedAt(),
+            $keys[1] => $this->getUserId(),
+            $keys[2] => $this->getProductId(),
+            $keys[3] => $this->getQuantity(),
+            $keys[4] => $this->getTotalPrice(),
+            $keys[5] => $this->getStatus(),
+            $keys[6] => $this->getCreatedAt(),
+            $keys[7] => $this->getUpdatedAt(),
         ];
-        if ($result[$keys[5]] instanceof \DateTimeInterface) {
-            $result[$keys[5]] = $result[$keys[5]]->format('Y-m-d H:i:s.u');
-        }
-
         if ($result[$keys[6]] instanceof \DateTimeInterface) {
             $result[$keys[6]] = $result[$keys[6]]->format('Y-m-d H:i:s.u');
+        }
+
+        if ($result[$keys[7]] instanceof \DateTimeInterface) {
+            $result[$keys[7]] = $result[$keys[7]]->format('Y-m-d H:i:s.u');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1125,20 +1179,35 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->collOrders) {
+            if (null !== $this->aUser) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'orders';
+                        $key = 'user';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'orderss';
+                        $key = 'users';
                         break;
                     default:
-                        $key = 'Orders';
+                        $key = 'User';
                 }
 
-                $result[$key] = $this->collOrders->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aProduct) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'product';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'products';
+                        break;
+                    default:
+                        $key = 'Product';
+                }
+
+                $result[$key] = $this->aProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1158,7 +1227,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function setByName(string $name, $value, string $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = OrderTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         $this->setByPosition($pos, $value);
 
@@ -1180,25 +1249,28 @@ abstract class User implements ActiveRecordInterface
                 $this->setId($value);
                 break;
             case 1:
-                $this->setEmail($value);
+                $this->setUserId($value);
                 break;
             case 2:
-                $this->setPassword($value);
+                $this->setProductId($value);
                 break;
             case 3:
-                $this->setName($value);
+                $this->setQuantity($value);
                 break;
             case 4:
-                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+                $this->setTotalPrice($value);
+                break;
+            case 5:
+                $valueSet = OrderTableMap::getValueSet(OrderTableMap::COL_STATUS);
                 if (isset($valueSet[$value])) {
                     $value = $valueSet[$value];
                 }
-                $this->setRole($value);
-                break;
-            case 5:
-                $this->setCreatedAt($value);
+                $this->setStatus($value);
                 break;
             case 6:
+                $this->setCreatedAt($value);
+                break;
+            case 7:
                 $this->setUpdatedAt($value);
                 break;
         } // switch()
@@ -1225,28 +1297,31 @@ abstract class User implements ActiveRecordInterface
      */
     public function fromArray(array $arr, string $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = UserTableMap::getFieldNames($keyType);
+        $keys = OrderTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setEmail($arr[$keys[1]]);
+            $this->setUserId($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setPassword($arr[$keys[2]]);
+            $this->setProductId($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setName($arr[$keys[3]]);
+            $this->setQuantity($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setRole($arr[$keys[4]]);
+            $this->setTotalPrice($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setCreatedAt($arr[$keys[5]]);
+            $this->setStatus($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setUpdatedAt($arr[$keys[6]]);
+            $this->setCreatedAt($arr[$keys[6]]);
+        }
+        if (array_key_exists($keys[7], $arr)) {
+            $this->setUpdatedAt($arr[$keys[7]]);
         }
 
         return $this;
@@ -1289,28 +1364,31 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildCriteria(): Criteria
     {
-        $criteria = new Criteria(UserTableMap::DATABASE_NAME);
+        $criteria = new Criteria(OrderTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserTableMap::COL_ID)) {
-            $criteria->add(UserTableMap::COL_ID, $this->id);
+        if ($this->isColumnModified(OrderTableMap::COL_ID)) {
+            $criteria->add(OrderTableMap::COL_ID, $this->id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $criteria->add(UserTableMap::COL_EMAIL, $this->email);
+        if ($this->isColumnModified(OrderTableMap::COL_USER_ID)) {
+            $criteria->add(OrderTableMap::COL_USER_ID, $this->user_id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $criteria->add(UserTableMap::COL_PASSWORD, $this->password);
+        if ($this->isColumnModified(OrderTableMap::COL_PRODUCT_ID)) {
+            $criteria->add(OrderTableMap::COL_PRODUCT_ID, $this->product_id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_NAME)) {
-            $criteria->add(UserTableMap::COL_NAME, $this->name);
+        if ($this->isColumnModified(OrderTableMap::COL_QUANTITY)) {
+            $criteria->add(OrderTableMap::COL_QUANTITY, $this->quantity);
         }
-        if ($this->isColumnModified(UserTableMap::COL_ROLE)) {
-            $criteria->add(UserTableMap::COL_ROLE, $this->role);
+        if ($this->isColumnModified(OrderTableMap::COL_TOTAL_PRICE)) {
+            $criteria->add(OrderTableMap::COL_TOTAL_PRICE, $this->total_price);
         }
-        if ($this->isColumnModified(UserTableMap::COL_CREATED_AT)) {
-            $criteria->add(UserTableMap::COL_CREATED_AT, $this->created_at);
+        if ($this->isColumnModified(OrderTableMap::COL_STATUS)) {
+            $criteria->add(OrderTableMap::COL_STATUS, $this->status);
         }
-        if ($this->isColumnModified(UserTableMap::COL_UPDATED_AT)) {
-            $criteria->add(UserTableMap::COL_UPDATED_AT, $this->updated_at);
+        if ($this->isColumnModified(OrderTableMap::COL_CREATED_AT)) {
+            $criteria->add(OrderTableMap::COL_CREATED_AT, $this->created_at);
+        }
+        if ($this->isColumnModified(OrderTableMap::COL_UPDATED_AT)) {
+            $criteria->add(OrderTableMap::COL_UPDATED_AT, $this->updated_at);
         }
 
         return $criteria;
@@ -1328,8 +1406,8 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildPkeyCriteria(): Criteria
     {
-        $criteria = ChildUserQuery::create();
-        $criteria->add(UserTableMap::COL_ID, $this->id);
+        $criteria = ChildOrderQuery::create();
+        $criteria->add(OrderTableMap::COL_ID, $this->id);
 
         return $criteria;
     }
@@ -1392,7 +1470,7 @@ abstract class User implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param object $copyObj An object of \App\Models\User (or compatible) type.
+     * @param object $copyObj An object of \App\Models\Order (or compatible) type.
      * @param bool $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param bool $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws \Propel\Runtime\Exception\PropelException
@@ -1400,26 +1478,13 @@ abstract class User implements ActiveRecordInterface
      */
     public function copyInto(object $copyObj, bool $deepCopy = false, bool $makeNew = true): void
     {
-        $copyObj->setEmail($this->getEmail());
-        $copyObj->setPassword($this->getPassword());
-        $copyObj->setName($this->getName());
-        $copyObj->setRole($this->getRole());
+        $copyObj->setUserId($this->getUserId());
+        $copyObj->setProductId($this->getProductId());
+        $copyObj->setQuantity($this->getQuantity());
+        $copyObj->setTotalPrice($this->getTotalPrice());
+        $copyObj->setStatus($this->getStatus());
         $copyObj->setCreatedAt($this->getCreatedAt());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
-
-        if ($deepCopy) {
-            // important: temporarily setNew(false) because this affects the behavior of
-            // the getter/setter methods for fkey referrer objects.
-            $copyObj->setNew(false);
-
-            foreach ($this->getOrders() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addOrder($relObj->copy($deepCopy));
-                }
-            }
-
-        } // if ($deepCopy)
-
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1435,7 +1500,7 @@ abstract class User implements ActiveRecordInterface
      * objects.
      *
      * @param bool $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \App\Models\User Clone of current object.
+     * @return \App\Models\Order Clone of current object.
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function copy(bool $deepCopy = false)
@@ -1448,286 +1513,106 @@ abstract class User implements ActiveRecordInterface
         return $copyObj;
     }
 
-
     /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
+     * Declares an association between this object and a ChildUser object.
      *
-     * @param string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName): void
-    {
-        if ('Order' === $relationName) {
-            $this->initOrders();
-            return;
-        }
-    }
-
-    /**
-     * Clears out the collOrders collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return $this
-     * @see addOrders()
-     */
-    public function clearOrders()
-    {
-        $this->collOrders = null; // important to set this to NULL since that means it is uninitialized
-
-        return $this;
-    }
-
-    /**
-     * Reset is the collOrders collection loaded partially.
-     *
-     * @return void
-     */
-    public function resetPartialOrders($v = true): void
-    {
-        $this->collOrdersPartial = $v;
-    }
-
-    /**
-     * Initializes the collOrders collection.
-     *
-     * By default this just sets the collOrders collection to an empty array (like clearcollOrders());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param bool $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initOrders(bool $overrideExisting = true): void
-    {
-        if (null !== $this->collOrders && !$overrideExisting) {
-            return;
-        }
-
-        $collectionClassName = OrderTableMap::getTableMap()->getCollectionClassName();
-
-        $this->collOrders = new $collectionClassName;
-        $this->collOrders->setModel('\App\Models\Order');
-    }
-
-    /**
-     * Gets an array of ChildOrder objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param Criteria $criteria optional Criteria object to narrow the query
-     * @param ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildOrder[] List of ChildOrder objects
-     * @phpstan-return ObjectCollection&\Traversable<ChildOrder> List of ChildOrder objects
+     * @param ChildUser $v
+     * @return $this The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function getOrders(?Criteria $criteria = null, ?ConnectionInterface $con = null)
+    public function setUser(ChildUser $v = null)
     {
-        $partial = $this->collOrdersPartial && !$this->isNew();
-        if (null === $this->collOrders || null !== $criteria || $partial) {
-            if ($this->isNew()) {
-                // return empty collection
-                if (null === $this->collOrders) {
-                    $this->initOrders();
-                } else {
-                    $collectionClassName = OrderTableMap::getTableMap()->getCollectionClassName();
-
-                    $collOrders = new $collectionClassName;
-                    $collOrders->setModel('\App\Models\Order');
-
-                    return $collOrders;
-                }
-            } else {
-                $collOrders = ChildOrderQuery::create(null, $criteria)
-                    ->filterByUser($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collOrdersPartial && count($collOrders)) {
-                        $this->initOrders(false);
-
-                        foreach ($collOrders as $obj) {
-                            if (false == $this->collOrders->contains($obj)) {
-                                $this->collOrders->append($obj);
-                            }
-                        }
-
-                        $this->collOrdersPartial = true;
-                    }
-
-                    return $collOrders;
-                }
-
-                if ($partial && $this->collOrders) {
-                    foreach ($this->collOrders as $obj) {
-                        if ($obj->isNew()) {
-                            $collOrders[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collOrders = $collOrders;
-                $this->collOrdersPartial = false;
-            }
+        if ($v === null) {
+            $this->setUserId(NULL);
+        } else {
+            $this->setUserId($v->getId());
         }
 
-        return $this->collOrders;
-    }
+        $this->aUser = $v;
 
-    /**
-     * Sets a collection of ChildOrder objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param Collection $orders A Propel collection.
-     * @param ConnectionInterface $con Optional connection object
-     * @return $this The current object (for fluent API support)
-     */
-    public function setOrders(Collection $orders, ?ConnectionInterface $con = null)
-    {
-        /** @var ChildOrder[] $ordersToDelete */
-        $ordersToDelete = $this->getOrders(new Criteria(), $con)->diff($orders);
-
-
-        $this->ordersScheduledForDeletion = $ordersToDelete;
-
-        foreach ($ordersToDelete as $orderRemoved) {
-            $orderRemoved->setUser(null);
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUser object, it will not be re-added.
+        if ($v !== null) {
+            $v->addOrder($this);
         }
 
-        $this->collOrders = null;
-        foreach ($orders as $order) {
-            $this->addOrder($order);
-        }
-
-        $this->collOrders = $orders;
-        $this->collOrdersPartial = false;
 
         return $this;
     }
 
+
     /**
-     * Returns the number of related Order objects.
+     * Get the associated ChildUser object
      *
-     * @param Criteria $criteria
-     * @param bool $distinct
-     * @param ConnectionInterface $con
-     * @return int Count of related Order objects.
+     * @param ConnectionInterface $con Optional Connection object.
+     * @return ChildUser The associated ChildUser object.
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function countOrders(?Criteria $criteria = null, bool $distinct = false, ?ConnectionInterface $con = null): int
+    public function getUser(?ConnectionInterface $con = null)
     {
-        $partial = $this->collOrdersPartial && !$this->isNew();
-        if (null === $this->collOrders || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collOrders) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getOrders());
-            }
-
-            $query = ChildOrderQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUser($this)
-                ->count($con);
+        if ($this->aUser === null && ($this->user_id != 0)) {
+            $this->aUser = ChildUserQuery::create()->findPk($this->user_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUser->addOrders($this);
+             */
         }
 
-        return count($this->collOrders);
+        return $this->aUser;
     }
 
     /**
-     * Method called to associate a ChildOrder object to this object
-     * through the ChildOrder foreign key attribute.
+     * Declares an association between this object and a ChildProduct object.
      *
-     * @param ChildOrder $l ChildOrder
+     * @param ChildProduct $v
      * @return $this The current object (for fluent API support)
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function addOrder(ChildOrder $l)
+    public function setProduct(ChildProduct $v = null)
     {
-        if ($this->collOrders === null) {
-            $this->initOrders();
-            $this->collOrdersPartial = true;
+        if ($v === null) {
+            $this->setProductId(NULL);
+        } else {
+            $this->setProductId($v->getId());
         }
 
-        if (!$this->collOrders->contains($l)) {
-            $this->doAddOrder($l);
+        $this->aProduct = $v;
 
-            if ($this->ordersScheduledForDeletion and $this->ordersScheduledForDeletion->contains($l)) {
-                $this->ordersScheduledForDeletion->remove($this->ordersScheduledForDeletion->search($l));
-            }
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildProduct object, it will not be re-added.
+        if ($v !== null) {
+            $v->addOrder($this);
         }
 
-        return $this;
-    }
-
-    /**
-     * @param ChildOrder $order The ChildOrder object to add.
-     */
-    protected function doAddOrder(ChildOrder $order): void
-    {
-        $this->collOrders[]= $order;
-        $order->setUser($this);
-    }
-
-    /**
-     * @param ChildOrder $order The ChildOrder object to remove.
-     * @return $this The current object (for fluent API support)
-     */
-    public function removeOrder(ChildOrder $order)
-    {
-        if ($this->getOrders()->contains($order)) {
-            $pos = $this->collOrders->search($order);
-            $this->collOrders->remove($pos);
-            if (null === $this->ordersScheduledForDeletion) {
-                $this->ordersScheduledForDeletion = clone $this->collOrders;
-                $this->ordersScheduledForDeletion->clear();
-            }
-            $this->ordersScheduledForDeletion[]= clone $order;
-            $order->setUser(null);
-        }
 
         return $this;
     }
 
 
     /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related Orders from storage.
+     * Get the associated ChildProduct object
      *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param Criteria $criteria optional Criteria object to narrow the query
-     * @param ConnectionInterface $con optional connection object
-     * @param string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildOrder[] List of ChildOrder objects
-     * @phpstan-return ObjectCollection&\Traversable<ChildOrder}> List of ChildOrder objects
+     * @param ConnectionInterface $con Optional Connection object.
+     * @return ChildProduct The associated ChildProduct object.
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function getOrdersJoinProduct(?Criteria $criteria = null, ?ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getProduct(?ConnectionInterface $con = null)
     {
-        $query = ChildOrderQuery::create(null, $criteria);
-        $query->joinWith('Product', $joinBehavior);
+        if ($this->aProduct === null && ($this->product_id != 0)) {
+            $this->aProduct = ChildProductQuery::create()->findPk($this->product_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aProduct->addOrders($this);
+             */
+        }
 
-        return $this->getOrders($query, $con);
+        return $this->aProduct;
     }
 
     /**
@@ -1739,11 +1624,18 @@ abstract class User implements ActiveRecordInterface
      */
     public function clear()
     {
+        if (null !== $this->aUser) {
+            $this->aUser->removeOrder($this);
+        }
+        if (null !== $this->aProduct) {
+            $this->aProduct->removeOrder($this);
+        }
         $this->id = null;
-        $this->email = null;
-        $this->password = null;
-        $this->name = null;
-        $this->role = null;
+        $this->user_id = null;
+        $this->product_id = null;
+        $this->quantity = null;
+        $this->total_price = null;
+        $this->status = null;
         $this->created_at = null;
         $this->updated_at = null;
         $this->alreadyInSave = false;
@@ -1768,14 +1660,10 @@ abstract class User implements ActiveRecordInterface
     public function clearAllReferences(bool $deep = false)
     {
         if ($deep) {
-            if ($this->collOrders) {
-                foreach ($this->collOrders as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
-        $this->collOrders = null;
+        $this->aUser = null;
+        $this->aProduct = null;
         return $this;
     }
 
@@ -1786,7 +1674,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(UserTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(OrderTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**

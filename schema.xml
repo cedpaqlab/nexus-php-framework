@@ -18,4 +18,47 @@
             <index-column name="role"/>
         </index>
     </table>
+    
+    <table name="products" phpName="Product">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true"/>
+        <column name="description" type="LONGVARCHAR"/>
+        <column name="price" type="DECIMAL" size="10,2" required="true"/>
+        <column name="stock" type="INTEGER" default="0" required="true"/>
+        <column name="status" type="ENUM" valueSet="active,inactive" default="active" required="true"/>
+        <column name="created_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP"/>
+        <column name="updated_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" onUpdate="CURRENT_TIMESTAMP"/>
+        <index>
+            <index-column name="name"/>
+        </index>
+        <index>
+            <index-column name="status"/>
+        </index>
+    </table>
+    
+    <table name="orders" phpName="Order">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="user_id" type="INTEGER" required="true"/>
+        <column name="product_id" type="INTEGER" required="true"/>
+        <column name="quantity" type="INTEGER" required="true"/>
+        <column name="total_price" type="DECIMAL" size="10,2" required="true"/>
+        <column name="status" type="ENUM" valueSet="pending,completed,cancelled" default="pending" required="true"/>
+        <column name="created_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP"/>
+        <column name="updated_at" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" onUpdate="CURRENT_TIMESTAMP"/>
+        <foreign-key foreignTable="users">
+            <reference local="user_id" foreign="id"/>
+        </foreign-key>
+        <foreign-key foreignTable="products">
+            <reference local="product_id" foreign="id"/>
+        </foreign-key>
+        <index>
+            <index-column name="user_id"/>
+        </index>
+        <index>
+            <index-column name="product_id"/>
+        </index>
+        <index>
+            <index-column name="status"/>
+        </index>
+    </table>
 </database>
