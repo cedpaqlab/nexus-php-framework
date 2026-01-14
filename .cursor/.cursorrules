@@ -60,3 +60,4 @@ Processus de travail
 - Always share and validate a detailed plan before modifying code.
 - Assess global impact (security, performance, DX) before changes.
 - Perform a mental code review before delivery.
+- NEVER create .md documentation files without explicit user confirmation.
