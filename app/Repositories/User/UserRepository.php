@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Repositories\User;
 
 use App\Repositories\Contracts\DatabaseConnectorInterface;
-use App\Repositories\Factory\ConnectorFactory;
 
 class UserRepository
 {
     private DatabaseConnectorInterface $connector;
     private string $table = 'users';
 
-    public function __construct(?DatabaseConnectorInterface $connector = null)
+    public function __construct(DatabaseConnectorInterface $connector)
     {
-        $this->connector = $connector ?? ConnectorFactory::create();
+        $this->connector = $connector;
     }
 
     public function findById(int $id): ?array

@@ -25,8 +25,16 @@ class QueryBuilder
 
     public function table(string $table): self
     {
+        if (!$this->isValidTableName($table)) {
+            throw new \InvalidArgumentException("Invalid table name: {$table}");
+        }
         $this->table = $table;
         return $this;
+    }
+
+    private function isValidTableName(string $table): bool
+    {
+        return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table) === 1;
     }
 
     public function select(string ...$columns): self

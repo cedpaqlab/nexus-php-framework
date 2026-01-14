@@ -4,41 +4,45 @@ declare(strict_types=1);
 
 namespace App\Services\Security;
 
+use App\Services\Session\SessionService;
 use Config;
 
 class CsrfService
 {
     private string $tokenName;
     private int $tokenLifetime;
+    private SessionService $session;
 
-    public function __construct()
+    public function __construct(?SessionService $session = null)
     {
         $this->tokenName = Config::get('security.csrf.token_name', '_csrf_token');
         $this->tokenLifetime = Config::get('security.csrf.token_lifetime', 3600);
+        $this->session = $session ?? new SessionService();
     }
 
     public function generate(): string
     {
-        if (!isset($_SESSION[$this->tokenName])) {
-            $_SESSION[$this->tokenName] = [
+        if (!$this->session->has($this->tokenName)) {
+            $this->session->set($this->tokenName, [
                 'token' => bin2hex(random_bytes(32)),
                 'expires' => time() + $this->tokenLifetime,
-            ];
+            ]);
         }
 
-        return $_SESSION[$this->tokenName]['token'];
+        $tokenData = $this->session->get($this->tokenName);
+        return $tokenData['token'];
     }
 
     public function validate(string $token): bool
     {
-        if (!isset($_SESSION[$this->tokenName])) {
+        if (!$this->session->has($this->tokenName)) {
             return false;
         }
 
-        $sessionToken = $_SESSION[$this->tokenName];
+        $sessionToken = $this->session->get($this->tokenName);
 
         if (time() > $sessionToken['expires']) {
-            unset($_SESSION[$this->tokenName]);
+            $this->session->remove($this->tokenName);
             return false;
         }
 

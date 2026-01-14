@@ -14,18 +14,25 @@ use App\Exceptions\PropelNotInstalledException;
 
 class ConnectorFactory
 {
-    public static function create(?string $connector = null, ?Connection $connection = null): DatabaseConnectorInterface
+    private Connection $connection;
+
+    public function __construct(Connection $connection)
+    {
+        $this->connection = $connection;
+    }
+
+    public function create(?string $connector = null): DatabaseConnectorInterface
     {
         $connector = $connector ?? Config::get('database.connector', 'querybuilder');
 
         return match ($connector) {
-            'querybuilder' => new QueryBuilderConnector($connection),
-            'propel' => self::createPropelConnector(),
+            'querybuilder' => new QueryBuilderConnector($this->connection),
+            'propel' => $this->createPropelConnector(),
             default => throw new UnknownConnectorException($connector),
         };
     }
 
-    private static function createPropelConnector(): PropelConnector
+    private function createPropelConnector(): PropelConnector
     {
         if (!class_exists(\Propel\Runtime\Propel::class)) {
             throw new PropelNotInstalledException();

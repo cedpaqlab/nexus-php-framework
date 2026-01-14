@@ -6,11 +6,13 @@ namespace App\Http\Middlewares;
 
 use App\Http\Request;
 use App\Http\Response;
+use App\Services\Session\SessionService;
 
 class AuthMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private Response $response
+        private Response $response,
+        private SessionService $session
     ) {
     }
 
@@ -25,6 +27,6 @@ class AuthMiddleware implements MiddlewareInterface
 
     private function isAuthenticated(Request $request): bool
     {
-        return isset($_SESSION['user_id']);
+        return $this->session->has('user_id');
     }
 }

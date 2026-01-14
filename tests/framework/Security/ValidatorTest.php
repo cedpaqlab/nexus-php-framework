@@ -88,4 +88,20 @@ class ValidatorTest extends TestCase
         $errors = $this->validator->validate($data, $rules);
         $this->assertEmpty($errors);
     }
+
+    public function testUniqueRuleRequiresConnector(): void
+    {
+        $connector = $this->createMock(\App\Repositories\Contracts\DatabaseConnectorInterface::class);
+        $connector->expects($this->once())
+            ->method('count')
+            ->with('users', ['email' => 'existing@example.com'])
+            ->willReturn(1);
+
+        $validator = new \App\Services\Security\Validator($connector);
+        $data = ['email' => 'existing@example.com'];
+        $rules = ['email' => 'unique:users,email'];
+        $errors = $validator->validate($data, $rules);
+        
+        $this->assertArrayHasKey('email', $errors);
+    }
 }

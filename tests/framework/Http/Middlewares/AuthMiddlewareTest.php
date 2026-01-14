@@ -8,10 +8,12 @@ use Tests\Support\TestCase;
 use App\Http\Request;
 use App\Http\Response;
 use App\Http\Middlewares\AuthMiddleware;
+use App\Services\Session\SessionService;
 
 class AuthMiddlewareTest extends TestCase
 {
     private AuthMiddleware $middleware;
+    private SessionService $session;
 
     protected function setUp(): void
     {
@@ -19,12 +21,13 @@ class AuthMiddlewareTest extends TestCase
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->middleware = new AuthMiddleware(new Response());
+        $this->session = new SessionService();
+        $this->middleware = new AuthMiddleware(new Response(), $this->session);
     }
 
     public function testAuthenticatedUserPasses(): void
     {
-        $_SESSION['user_id'] = 1;
+        $this->session->set('user_id', 1);
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $request = new Request();
         
@@ -37,7 +40,7 @@ class AuthMiddlewareTest extends TestCase
 
     public function testUnauthenticatedUserBlocked(): void
     {
-        unset($_SESSION['user_id']);
+        $this->session->remove('user_id');
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $request = new Request();
         

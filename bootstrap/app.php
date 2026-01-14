@@ -8,6 +8,10 @@ require_once __DIR__ . '/../config/loader.php';
 require_once __DIR__ . '/container.php';
 require_once __DIR__ . '/error_handler.php';
 
+if (function_exists('setErrorHandlerContainer')) {
+    setErrorHandlerContainer($container);
+}
+
 use App\Services\Helpers\PathHelper;
 
 PathHelper::setBasePath(dirname(__DIR__));
@@ -39,6 +43,10 @@ $providers = [
 foreach ($providers as $provider) {
     $providerInstance = new $provider($container);
     $providerInstance->register();
+}
+
+if (function_exists('setErrorHandlerContainer')) {
+    setErrorHandlerContainer($container);
 }
 
 return $container;

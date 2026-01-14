@@ -8,15 +8,22 @@ use Tests\Support\TestCase;
 use App\Http\Request;
 use App\Http\Response;
 use App\Http\Router;
+use Container;
 
 class RouterTest extends TestCase
 {
     private Router $router;
+    private Container $container;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->container = new Container();
+        $this->container->bind(Response::class, function () {
+            return new Response();
+        });
         $this->router = new Router();
+        $this->router->setContainer($this->container);
     }
 
     public function testGetRoute(): void

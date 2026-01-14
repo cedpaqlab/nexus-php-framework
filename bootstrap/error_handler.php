@@ -5,9 +5,22 @@ declare(strict_types=1);
 use App\Services\Logger\Logger;
 
 static $logger = null;
+static $errorHandlerContainer = null;
+
+function setErrorHandlerContainer(Container $containerInstance): void
+{
+    global $errorHandlerContainer;
+    $errorHandlerContainer = $containerInstance;
+}
 
 if ($logger === null) {
-    $logger = new Logger();
+    $logger = function () {
+        global $errorHandlerContainer;
+        if ($errorHandlerContainer !== null && $errorHandlerContainer->has(Logger::class)) {
+            return $errorHandlerContainer->get(Logger::class);
+        }
+        return new Logger();
+    };
 }
 
 set_error_handler(function (int $severity, string $message, string $file, int $line) use (&$logger): bool {
@@ -15,7 +28,8 @@ set_error_handler(function (int $severity, string $message, string $file, int $l
         return false;
     }
 
-    $logger->error("Error: {$message} in {$file} on line {$line}");
+    $loggerInstance = is_callable($logger) ? $logger() : $logger;
+    $loggerInstance->error("Error: {$message} in {$file} on line {$line}");
 
     $debug = \Config::get('app.debug', false);
 
@@ -27,7 +41,8 @@ set_error_handler(function (int $severity, string $message, string $file, int $l
 });
 
 set_exception_handler(function (Throwable $exception) use (&$logger): void {
-    $logger->critical("Uncaught exception: " . $exception->getMessage(), [
+    $loggerInstance = is_callable($logger) ? $logger() : $logger;
+    $loggerInstance->critical("Uncaught exception: " . $exception->getMessage(), [
         'file' => $exception->getFile(),
         'line' => $exception->getLine(),
         'trace' => $exception->getTraceAsString(),

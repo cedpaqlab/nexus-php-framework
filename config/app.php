@@ -9,4 +9,5 @@ return [
     'url' => $_ENV['APP_URL'] ?? 'http://localhost',
     'timezone' => $_ENV['TIMEZONE'] ?? 'UTC',
     'locale' => $_ENV['LOCALE'] ?? 'en_US',
+    'log_level' => $_ENV['LOG_LEVEL'] ?? 'debug',
 ];

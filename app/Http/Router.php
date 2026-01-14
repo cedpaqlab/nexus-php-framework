@@ -6,6 +6,7 @@ namespace App\Http;
 
 use Container;
 use App\Exceptions\MiddlewareNotFoundException;
+use App\Exceptions\BindingNotFoundException;
 
 class Router
 {
@@ -120,11 +121,13 @@ class Router
         $current = array_shift($middleware);
         
         if (is_string($current)) {
-            if ($this->container !== null && $this->container->has($current)) {
-                $middlewareInstance = $this->container->get($current);
-            } else {
-                $middlewareInstance = new $current();
+            if ($this->container === null) {
+                throw new \RuntimeException('Container is not set. Cannot resolve middleware: ' . $current);
             }
+            if (!$this->container->has($current)) {
+                throw new MiddlewareNotFoundException($current);
+            }
+            $middlewareInstance = $this->container->get($current);
         } else {
             $middlewareInstance = $current;
         }
@@ -164,27 +167,19 @@ class Router
 
     private function resolveInstance(string $class): object
     {
-        if ($this->container !== null && $this->container->has($class)) {
-            return $this->container->get($class);
+        if ($this->container === null) {
+            throw new BindingNotFoundException("Container is not set. Cannot resolve: {$class}");
         }
 
-        if ($this->container !== null) {
-            return $this->container->make($class);
-        }
-
-        return new $class();
+        return $this->container->make($class);
     }
 
     private function getResponse(): Response
     {
-        if ($this->container !== null && $this->container->has(Response::class)) {
-            return $this->container->get(Response::class);
+        if ($this->container === null) {
+            throw new \RuntimeException("Container is not set. Cannot resolve: " . Response::class);
         }
 
-        if ($this->container !== null) {
-            return $this->container->make(Response::class);
-        }
-
-        return new Response();
+        return $this->container->make(Response::class);
     }
 }

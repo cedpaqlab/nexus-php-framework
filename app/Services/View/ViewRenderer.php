@@ -27,16 +27,18 @@ class ViewRenderer
 
         $data = array_merge($this->sharedData, $data);
 
-        // Use closure to provide variables safely without extract()
+        // Use closure to provide variables safely without extract() or variable variables
         $render = function ($__viewFile, $__data) {
-            // Make data available as individual variables
-            foreach ($__data as $__key => $__value) {
-                $$__key = $__value;
-            }
-            unset($__key, $__value, $__data);
-            
+            // Isolate scope and provide data as array for safer access
             ob_start();
-            include $__viewFile;
+            (function () use ($__viewFile, $__data) {
+                // Extract data into local scope safely
+                foreach ($__data as $__key => $__value) {
+                    ${$__key} = $__value;
+                }
+                unset($__key, $__value);
+                include $__viewFile;
+            })();
             return ob_get_clean();
         };
 

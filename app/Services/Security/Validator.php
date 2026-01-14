@@ -4,9 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Security;
 
+use App\Repositories\Contracts\DatabaseConnectorInterface;
+
 class Validator
 {
     private array $messages = [];
+    private ?DatabaseConnectorInterface $connector;
+
+    public function __construct(?DatabaseConnectorInterface $connector = null)
+    {
+        $this->connector = $connector;
+    }
 
     public function validate(array $data, array $rules): array
     {
@@ -118,15 +126,17 @@ class Validator
             return null;
         }
 
+        if ($this->connector === null) {
+            return null;
+        }
+
         [$table, $column] = explode(',', $param);
         $table = trim($table);
         $column = trim($column);
 
-        $pdo = \App\Repositories\Database\Connection::getInstance();
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM {$table} WHERE {$column} = ?");
-        $stmt->execute([$value]);
+        $count = $this->connector->count($table, [$column => $value]);
 
-        if ($stmt->fetchColumn() > 0) {
+        if ($count > 0) {
             return "The {$field} has already been taken.";
         }
 

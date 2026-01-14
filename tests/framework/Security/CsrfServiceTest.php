@@ -6,10 +6,12 @@ namespace Tests\Framework\Security;
 
 use Tests\Support\TestCase;
 use App\Services\Security\CsrfService;
+use App\Services\Session\SessionService;
 
 class CsrfServiceTest extends TestCase
 {
     private CsrfService $service;
+    private SessionService $session;
 
     protected function setUp(): void
     {
@@ -17,8 +19,9 @@ class CsrfServiceTest extends TestCase
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->service = new CsrfService();
-        $_SESSION = [];
+        $this->session = new SessionService();
+        $this->service = new CsrfService($this->session);
+        $this->session->flush();
     }
 
     public function testGenerateToken(): void
@@ -43,7 +46,9 @@ class CsrfServiceTest extends TestCase
     public function testValidateExpiredToken(): void
     {
         $token = $this->service->generate();
-        $_SESSION['_csrf_token']['expires'] = time() - 1;
+        $tokenData = $this->session->get('_csrf_token');
+        $tokenData['expires'] = time() - 1;
+        $this->session->set('_csrf_token', $tokenData);
         $this->assertFalse($this->service->validate($token));
     }
 

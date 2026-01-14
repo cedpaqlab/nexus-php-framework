@@ -14,9 +14,8 @@ class QueryBuilderConnector implements DatabaseConnectorInterface
     private QueryBuilder $query;
     private Transaction $transaction;
 
-    public function __construct(?Connection $connection = null)
+    public function __construct(Connection $connection)
     {
-        $connection = $connection ?? new Connection();
         $pdo = $connection->getPdo();
         $this->query = new QueryBuilder($pdo);
         $this->transaction = new Transaction($pdo);

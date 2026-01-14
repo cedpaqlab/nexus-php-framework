@@ -47,7 +47,6 @@ class Connection
 
     private function create(): PDO
     {
-        require_once __DIR__ . '/../../../config/loader.php';
         $config = Config::get('database.connections');
         $connection = $config[$this->connectionName] ?? $config['mysql'];
 
