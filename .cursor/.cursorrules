@@ -1,0 +1,32 @@
+Règle #1
+- Code and comments in English. Write comments only when they add value beyond clear code.
+
+Philosophie
+- Deliver optimized, maintainable code on first pass; avoid refactors through upfront rigor.
+- Validate a clear plan with the user before any code change.
+- Think globally about impact, security, and performance before delivery.
+
+Standards PHP modernes (2026)
+- Target PHP 8.2+ features: strict types, readonly, enums, attributes.
+- Follow PSR-12 (style) and PSR-4 (autoloading); keep classes focused (SOLID, DRY, KISS, YAGNI).
+- Prefer typed exceptions and explicit input validation.
+
+MySQL
+- Use prepared statements (PDO/MySQLi) for all queries; avoid dynamic SQL.
+- Wrap critical multi-step changes in transactions; avoid N+1 queries.
+- Maintain proper indexing and at least 3NF; use migrations for schema changes.
+
+Sécurité (OWASP Top 10)
+- Protect against injection, auth failures, sensitive data exposure, XXE.
+- Enforce access control, secure configuration, XSS protection, safe serialization.
+- Avoid vulnerable components; ensure logging and monitoring of security events.
+
+Qualité & performance
+- Keep code testable; add unit/integration tests where sensible.
+- Document inline only when it clarifies intent; keep code self-explanatory.
+- Optimize SQL and memory hotspots; use caching judiciously.
+
+Processus de travail
+- Always share and validate a detailed plan before modifying code.
+- Assess global impact (security, performance, DX) before changes.
+- Perform a mental code review before delivery.
