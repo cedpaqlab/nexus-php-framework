@@ -1,6 +1,6 @@
 {
     "name": "php-framework/custom",
-    "description": "Modern PHP Framework with MySQL",
+    "description": "Nexus PHP Framework - Modern PHP Framework with MySQL",
     "type": "project",
     "require": {
         "php": "^8.2",

@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Modern PHP Framework - Built for performance, security, and scalability">
-    <title>PHP Framework</title>
+    <meta name="description" content="Nexus PHP Framework - Built for performance, security, and scalability">
+    <title>Nexus PHP Framework</title>
     <link rel="stylesheet" href="/css/home.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
         <nav class="container">
-            <a href="/" class="logo">PHP Framework</a>
+            <a href="/" class="logo">Nexus PHP Framework</a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#docs">Docs</a></li>
@@ -76,7 +76,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 PHP Framework. Built with precision.</p>
+            <p>&copy; 2026 Nexus PHP Framework. Built with precision.</p>
         </div>
     </footer>
 

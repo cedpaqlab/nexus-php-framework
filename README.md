@@ -1,4 +1,4 @@
-# PHP Framework
+# Nexus PHP Framework
 
 Modern PHP Framework with MySQL, built with best practices and security in mind.
 
