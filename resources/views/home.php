@@ -62,7 +62,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">🚀</div>
                     <h3>Modern</h3>
-                    <p>PHP 8.2+ features. Latest standards and best practices.</p>
+                    <p>PHP 8.3+ features. Latest standards and best practices.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🎯</div>

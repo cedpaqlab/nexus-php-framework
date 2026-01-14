@@ -27,7 +27,7 @@ Modern PHP Framework with MySQL and Propel ORM, built with best practices and se
 
 ## Requirements
 
-- PHP 8.2+
+- PHP 8.3+
 - Composer
 - Docker & Docker Compose (for MySQL)
 - MySQL 8.0+

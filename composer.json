@@ -6,7 +6,7 @@
     "keywords": ["framework", "php", "mysql", "propel", "orm", "mvc", "rest", "api"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "ext-pdo": "*",
         "ext-json": "*",
         "ext-mbstring": "*"
