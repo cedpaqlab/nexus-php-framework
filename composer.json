@@ -1,7 +1,10 @@
 {
-    "name": "php-framework/custom",
-    "description": "Nexus PHP Framework - Modern PHP Framework with MySQL",
+    "name": "nexus-php/framework",
+    "description": "Nexus PHP Framework - Modern PHP Framework with MySQL, Propel ORM, and best practices",
+    "version": "0.1.0",
     "type": "project",
+    "keywords": ["framework", "php", "mysql", "propel", "orm", "mvc", "rest", "api"],
+    "license": "MIT",
     "require": {
         "php": "^8.2",
         "ext-pdo": "*",
@@ -37,5 +40,11 @@
         "sort-packages": true
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts": {
+        "test": "phpunit",
+        "migrate": "php scripts/migrate.php",
+        "seed": "php scripts/seed.php",
+        "fresh": "php scripts/fresh.php"
+    }
 }
