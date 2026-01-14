@@ -21,14 +21,21 @@ class PropelConnector implements DatabaseConnectorInterface
 
     private function initializePropel(): void
     {
-        if (Propel::isInit()) {
+        try {
+            $serviceContainer = Propel::getServiceContainer();
+        } catch (\Throwable $e) {
+            Propel::init();
+            $serviceContainer = Propel::getServiceContainer();
+        }
+
+        if ($serviceContainer->hasConnectionManager('default')) {
             return;
         }
 
-        $serviceContainer = Propel::getServiceContainer();
-        $serviceContainer->setAdapterClass('mysql', '\\Propel\\Runtime\\Adapter\\MysqlAdapter');
+        $serviceContainer->setAdapterClass('default', '\\Propel\\Runtime\\Adapter\\Pdo\\MysqlAdapter');
+        $serviceContainer->setDefaultDatasource('default');
         
-        $manager = new ConnectionManagerSingle();
+        $manager = new ConnectionManagerSingle('default');
         $manager->setConfiguration([
             'dsn' => $this->buildDsn(),
             'user' => $_ENV['DB_USERNAME'] ?? 'root',
@@ -41,8 +48,7 @@ class PropelConnector implements DatabaseConnectorInterface
             ],
         ]);
         
-        $serviceContainer->setConnectionManager('default', $manager);
-        $serviceContainer->setDefaultDatasource('default');
+        $serviceContainer->setConnectionManager($manager);
     }
 
     private function buildDsn(): string
@@ -106,12 +112,12 @@ class PropelConnector implements DatabaseConnectorInterface
             $query .= ' ORDER BY ' . implode(', ', $orderParts);
         }
         
-        if ($limit !== null) {
+        if ($limit !== null && $offset !== null) {
+            $query .= " LIMIT {$limit} OFFSET {$offset}";
+        } elseif ($limit !== null) {
             $query .= " LIMIT {$limit}";
-        }
-        
-        if ($offset !== null) {
-            $query .= " OFFSET {$offset}";
+        } elseif ($offset !== null) {
+            $query .= " LIMIT 18446744073709551615 OFFSET {$offset}";
         }
         
         $stmt = $this->connection->prepare($query);
