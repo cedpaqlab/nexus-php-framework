@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: php_framework_mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-rootsecret}"
+      MYSQL_DATABASE: "${DB_DATABASE:-php_framework}"
+      MYSQL_USER: "${DOCKER_DB_USER:-php_framework}"
+      MYSQL_PASSWORD: "${DOCKER_DB_PASSWORD:-secret}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - php_framework_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  php_framework_network:
+    driver: bridge
