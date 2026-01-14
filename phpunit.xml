@@ -11,7 +11,7 @@
          beStrictAboutTestsThatDoNotTestAnything="true">
     <testsuites>
         <testsuite name="Framework">
-            <directory>tests/framework</directory>
+            <directory>tests/Framework</directory>
         </testsuite>
     </testsuites>
     <source>

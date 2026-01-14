@@ -27,6 +27,9 @@
             "config/loader.php",
             "bootstrap/container.php",
             "bootstrap/propel.php"
+        ],
+        "classmap": [
+            "config/Config.php"
         ]
     },
     "autoload-dev": {

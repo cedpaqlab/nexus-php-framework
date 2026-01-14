@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Connectors;
 
-use Config;
+use Config\Config;
 use Propel\Runtime\Propel;
 use Propel\Runtime\Connection\ConnectionManagerSingle;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Security;
 
 use App\Services\Session\SessionService;
-use Config;
+use Config\Config;
 
 class CsrfService
 {

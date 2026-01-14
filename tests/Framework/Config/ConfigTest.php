@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Framework\Config;
 
 use Tests\Support\TestCase;
-use Config;
+use Config\Config;
 
 class ConfigTest extends TestCase
 {

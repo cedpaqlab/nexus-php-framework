@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Database;
 
-use Config;
+use Config\Config;
 use PDO;
 use PDOException;
 use App\Exceptions\DatabaseConnectionException;

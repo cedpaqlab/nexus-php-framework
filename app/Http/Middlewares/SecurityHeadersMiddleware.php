@@ -6,7 +6,7 @@ namespace App\Http\Middlewares;
 
 use App\Http\Request;
 use App\Http\Response;
-use Config;
+use Config\Config;
 
 class SecurityHeadersMiddleware implements MiddlewareInterface
 {

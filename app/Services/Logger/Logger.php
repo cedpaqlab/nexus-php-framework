@@ -18,7 +18,7 @@ class Logger
         $this->channel = $channel;
         $this->logPath = PathHelper::storagePath('logs');
         require_once __DIR__ . '/../../../config/loader.php';
-        $logLevel = \Config::get('app.log_level', $_ENV['LOG_LEVEL'] ?? 'debug');
+        $logLevel = \Config\Config::get('app.log_level', $_ENV['LOG_LEVEL'] ?? 'debug');
         $this->level = LogLevel::tryFrom($logLevel) ?? LogLevel::DEBUG;
 
         if (!is_dir($this->logPath)) {
