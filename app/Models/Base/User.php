@@ -663,7 +663,15 @@ abstract class User implements ActiveRecordInterface
             $this->name = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('Role', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->role = (null !== $col) ? (int) $col : null;
+            if ($col !== null) {
+                $valueSet = UserTableMap::getValueSet(UserTableMap::COL_ROLE);
+                $this->role = array_search($col, $valueSet, true);
+                if ($this->role === false) {
+                    $this->role = null;
+                }
+            } else {
+                $this->role = null;
+            }
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00 00:00:00') {
@@ -880,15 +888,12 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = [];
         $index = 0;
 
-        $this->modifiedColumns[UserTableMap::COL_ID] = true;
         if (null !== $this->id) {
             throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserTableMap::COL_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserTableMap::COL_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'id';
-        }
+        // Skip auto-increment primary key column
         if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
             $modifiedColumns[':p' . $index++]  = 'email';
         }
@@ -935,7 +940,7 @@ abstract class User implements ActiveRecordInterface
 
                         break;
                     case 'role':
-                        $stmt->bindValue($identifier, $this->role, PDO::PARAM_INT);
+                        $stmt->bindValue($identifier, $this->role, PDO::PARAM_STR);
 
                         break;
                     case 'created_at':
@@ -951,7 +956,8 @@ abstract class User implements ActiveRecordInterface
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
-            throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
+            $errorMsg = sprintf('Unable to execute INSERT statement [%s]. Error: %s', $sql, $e->getMessage());
+            throw new PropelException($errorMsg, 0, $e);
         }
 
         try {

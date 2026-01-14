@@ -19,30 +19,20 @@ class PropelConnector
 
     public function findUserById(int $id): ?User
     {
-        try {
-            return UserQuery::create()->findPk($id);
-        } catch (PropelException $e) {
-            return null;
-        }
+        return $this->executeQuery(fn() => UserQuery::create()->findPk($id));
     }
 
     public function findUserByEmail(string $email): ?User
     {
-        try {
-            return UserQuery::create()->findOneByEmail($email);
-        } catch (PropelException $e) {
-            return null;
-        }
+        return $this->executeQuery(fn() => UserQuery::create()->findOneByEmail($email));
     }
 
     public function findAllUsers(array $conditions = [], array $orderBy = [], ?int $limit = null, ?int $offset = null): array
     {
-        try {
-            $query = $this->buildQuery($conditions, $orderBy, $limit, $offset);
-            return $query->find()->toArray();
-        } catch (PropelException $e) {
-            return [];
-        }
+        return $this->executeQuery(
+            fn() => $this->buildQuery($conditions, $orderBy, $limit, $offset)->find()->toArray(),
+            []
+        );
     }
 
     public function createUser(array $data): User
@@ -83,12 +73,10 @@ class PropelConnector
 
     public function countUsers(array $conditions = []): int
     {
-        try {
-            $query = $this->buildQuery($conditions, [], null, null);
-            return $query->count();
-        } catch (PropelException $e) {
-            return 0;
-        }
+        return $this->executeQuery(
+            fn() => $this->buildQuery($conditions, [], null, null)->count(),
+            0
+        );
     }
 
     public function beginTransaction(): void
@@ -153,5 +141,14 @@ class PropelConnector
     private function camelize(string $string): string
     {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
+    }
+
+    private function executeQuery(callable $query, mixed $default = null): mixed
+    {
+        try {
+            return $query();
+        } catch (PropelException $e) {
+            return $default;
+        }
     }
 }

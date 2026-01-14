@@ -22,6 +22,12 @@ class PropelInitializer
             return;
         }
 
+        // Load generated database configuration
+        $generatedConf = dirname(__DIR__, 3) . '/generated-conf/loadDatabase.php';
+        if (file_exists($generatedConf)) {
+            require_once $generatedConf;
+        }
+
         try {
             $serviceContainer = Propel::getServiceContainer();
         } catch (\Throwable $e) {
