@@ -212,3 +212,21 @@
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
 }
+
+.error-messages {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    font-size: 0.9rem;
+}
+
+.error-messages ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.error-messages li {
+    margin: 0.25rem 0;
+}

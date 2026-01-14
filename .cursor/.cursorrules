@@ -61,3 +61,6 @@ Processus de travail
 - Assess global impact (security, performance, DX) before changes.
 - Perform a mental code review before delivery.
 - NEVER create .md documentation files without explicit user confirmation.
+
+Sur la coche
+- Ca veut dire tous les règles de qualité mentionnées ci-haut.

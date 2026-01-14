@@ -85,9 +85,16 @@ class AdminController
                 $id = $this->userService->create($data);
                 return $this->response->json(['success' => true, 'id' => $id], 201);
             } catch (\InvalidArgumentException $e) {
-                return $this->response->json(['success' => false, 'error' => 'Validation failed'], 400);
+                $message = $e->getMessage();
+                if (str_contains($message, 'json_encode')) {
+                    $decoded = json_decode(str_replace('Validation failed: ', '', $message), true);
+                    if (is_array($decoded)) {
+                        return $this->response->json(['success' => false, 'errors' => $decoded], 422);
+                    }
+                }
+                return $this->response->json(['success' => false, 'error' => $message], 400);
             } catch (\Exception $e) {
-                return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
+                return $this->response->json(['success' => false, 'error' => $e->getMessage()], 500);
             }
         }
 

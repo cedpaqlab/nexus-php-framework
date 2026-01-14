@@ -34,7 +34,11 @@ abstract class BaseRequest
             return $this->response->json(['errors' => $errors], 422);
         }
 
-        return $data;
+        // Filter data to only include fields defined in rules (whitelist approach)
+        $allowedFields = array_keys($rules);
+        $filteredData = array_intersect_key($data, array_flip($allowedFields));
+
+        return $filteredData;
     }
 
     protected function validated(): array

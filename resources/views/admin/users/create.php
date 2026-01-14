@@ -35,12 +35,17 @@ ob_start();
             <button type="submit" class="btn btn-primary">Create User</button>
             <a href="/admin/users" class="btn btn-secondary">Cancel</a>
         </div>
+        
+        <div id="error-messages" class="error-messages" style="display: none;"></div>
     </form>
 </section>
 
 <script>
 $('#createUserForm').on('submit', function(e) {
     e.preventDefault();
+    
+    const $errorMessages = $('#error-messages');
+    $errorMessages.hide().empty();
     
     $.ajax({
         url: '/admin/users',
@@ -53,11 +58,42 @@ $('#createUserForm').on('submit', function(e) {
             if (response.success) {
                 window.location.href = '/admin/users';
             } else {
-                alert('Error: ' + (response.error || 'Unknown error'));
+                let errorHtml = '';
+                if (response.errors) {
+                    errorHtml = '<ul>';
+                    for (const field in response.errors) {
+                        const fieldErrors = Array.isArray(response.errors[field]) 
+                            ? response.errors[field] 
+                            : [response.errors[field]];
+                        fieldErrors.forEach(error => {
+                            errorHtml += '<li>' + error + '</li>';
+                        });
+                    }
+                    errorHtml += '</ul>';
+                } else {
+                    errorHtml = '<p>' + (response.error || 'Unknown error') + '</p>';
+                }
+                $errorMessages.html(errorHtml).show();
             }
         },
-        error: function() {
-            alert('Error creating user');
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            let errorHtml = '';
+            if (response.errors) {
+                errorHtml = '<ul>';
+                for (const field in response.errors) {
+                    const fieldErrors = Array.isArray(response.errors[field]) 
+                        ? response.errors[field] 
+                        : [response.errors[field]];
+                    fieldErrors.forEach(error => {
+                        errorHtml += '<li>' + error + '</li>';
+                    });
+                }
+                errorHtml += '</ul>';
+            } else {
+                errorHtml = '<p>' + (response.error || 'An error occurred while creating the user') + '</p>';
+            }
+            $errorMessages.html(errorHtml).show();
         }
     });
 });

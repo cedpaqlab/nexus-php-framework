@@ -93,4 +93,36 @@ class RouterTest extends TestCase
         $response = $this->router->dispatch($request);
         $this->assertEquals(200, $response->getStatusCode());
     }
+
+    public function testGroupRouteWithTrailingSlash(): void
+    {
+        $this->router->group('/admin', function (Router $router) {
+            $router->get('/', function () {
+                return (new Response())->json(['admin' => true]);
+            });
+        });
+        
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/admin';
+        $request = new Request();
+        
+        $response = $this->router->dispatch($request);
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testGroupRouteWithoutTrailingSlash(): void
+    {
+        $this->router->group('/admin', function (Router $router) {
+            $router->get('/', function () {
+                return (new Response())->json(['admin' => true]);
+            });
+        });
+        
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/admin/';
+        $request = new Request();
+        
+        $response = $this->router->dispatch($request);
+        $this->assertEquals(200, $response->getStatusCode());
+    }
 }

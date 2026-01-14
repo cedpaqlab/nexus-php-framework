@@ -41,6 +41,15 @@
                         
                         <div id="error-message" class="error-message" style="display: none;"></div>
                     </form>
+                    
+                    <div class="quick-access">
+                        <p class="quick-access-label">Quick access (test accounts):</p>
+                        <div class="quick-access-links">
+                            <a href="#" class="quick-link" data-email="superadmin@example.com" data-password="superadmin123">Super Admin</a>
+                            <a href="#" class="quick-link" data-email="admin@example.com" data-password="admin123">Admin</a>
+                            <a href="#" class="quick-link" data-email="user@example.com" data-password="user123">User</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -78,6 +87,16 @@
                     $errorMsg.text(response.error || 'An error occurred').show();
                 }
             });
+        });
+        
+        $('.quick-link').on('click', function(e) {
+            e.preventDefault();
+            const email = $(this).data('email');
+            const password = $(this).data('password');
+            
+            $('#email').val(email);
+            $('#password').val(password);
+            $('#loginForm').submit();
         });
     </script>
 </body>

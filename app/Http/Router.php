@@ -68,14 +68,15 @@ class Router
     public function dispatch(Request $request): Response
     {
         $method = $request->method();
-        $uri = $request->uri();
+        $uri = rtrim($request->uri(), '/') ?: '/';
 
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
                 continue;
             }
 
-            $pattern = $this->convertToRegex($route['path']);
+            $routePath = rtrim($route['path'], '/') ?: '/';
+            $pattern = $this->convertToRegex($routePath);
             if (preg_match($pattern, $uri, $matches)) {
                 array_shift($matches);
                 $params = array_values($matches);
