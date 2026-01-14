@@ -6,15 +6,23 @@ namespace App\Services\View;
 
 use App\Services\Helpers\PathHelper;
 use App\Exceptions\ViewNotFoundException;
+use App\Services\Security\CsrfService;
 
 class ViewRenderer
 {
     private readonly string $viewsPath;
     private array $sharedData = [];
+    private ?CsrfService $csrfService = null;
 
-    public function __construct(string $viewsPath = null)
+    public function __construct(string $viewsPath = null, ?CsrfService $csrfService = null)
     {
         $this->viewsPath = $viewsPath ?? PathHelper::resourcesPath('views');
+        $this->csrfService = $csrfService;
+    }
+
+    public function setCsrfService(CsrfService $csrfService): void
+    {
+        $this->csrfService = $csrfService;
     }
 
     public function render(string $view, array $data = []): string
@@ -26,6 +34,10 @@ class ViewRenderer
         }
 
         $data = array_merge($this->sharedData, $data);
+        
+        if ($this->csrfService !== null) {
+            $data['csrf_token'] = $this->csrfService->generate();
+        }
 
         // Use closure to provide variables safely without extract() or variable variables
         $render = function ($__viewFile, $__data) {

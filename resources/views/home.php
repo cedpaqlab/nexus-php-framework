@@ -16,6 +16,7 @@
                 <li><a href="#features">Features</a></li>
                 <li><a href="#docs">Docs</a></li>
                 <li><a href="#github">GitHub</a></li>
+                <li><a href="/login" class="btn-login">Login</a></li>
             </ul>
         </nav>
     </header>

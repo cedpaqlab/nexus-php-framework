@@ -84,6 +84,11 @@ nav {
     position: relative;
 }
 
+.nav-links a.btn-login,
+.nav-links a.btn-logout {
+    color: #000000;
+}
+
 .nav-links a::after {
     content: '';
     position: absolute;
@@ -101,6 +106,27 @@ nav {
 
 .nav-links a:hover::after {
     width: 100%;
+}
+
+.btn-login,
+.btn-logout {
+    padding: 0.5rem 1.5rem;
+    background: var(--accent);
+    color: #000000;
+    border-radius: 0;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover,
+.btn-logout:hover {
+    background: var(--accent-hover);
+    color: #000000;
+}
+
+.btn-login::after,
+.btn-logout::after {
+    display: none;
 }
 
 main {
