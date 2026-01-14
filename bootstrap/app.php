@@ -48,4 +48,8 @@ $container->singleton(\App\Services\Logger\Logger::class, function () {
     return new \App\Services\Logger\Logger();
 });
 
+$container->singleton(\App\Services\View\ViewRenderer::class, function () {
+    return new \App\Services\View\ViewRenderer();
+});
+
 return $container;

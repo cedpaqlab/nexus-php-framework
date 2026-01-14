@@ -19,27 +19,27 @@ class Router
         $this->container = $container;
     }
 
-    public function get(string $path, callable|string $handler, array $middleware = []): void
+    public function get(string $path, callable|string|array $handler, array $middleware = []): void
     {
         $this->addRoute('GET', $path, $handler, $middleware);
     }
 
-    public function post(string $path, callable|string $handler, array $middleware = []): void
+    public function post(string $path, callable|string|array $handler, array $middleware = []): void
     {
         $this->addRoute('POST', $path, $handler, $middleware);
     }
 
-    public function put(string $path, callable|string $handler, array $middleware = []): void
+    public function put(string $path, callable|string|array $handler, array $middleware = []): void
     {
         $this->addRoute('PUT', $path, $handler, $middleware);
     }
 
-    public function delete(string $path, callable|string $handler, array $middleware = []): void
+    public function delete(string $path, callable|string|array $handler, array $middleware = []): void
     {
         $this->addRoute('DELETE', $path, $handler, $middleware);
     }
 
-    public function patch(string $path, callable|string $handler, array $middleware = []): void
+    public function patch(string $path, callable|string|array $handler, array $middleware = []): void
     {
         $this->addRoute('PATCH', $path, $handler, $middleware);
     }
@@ -90,7 +90,7 @@ class Router
         return (new Response())->notFound();
     }
 
-    private function addRoute(string $method, string $path, callable|string $handler, array $middleware): void
+    private function addRoute(string $method, string $path, callable|string|array $handler, array $middleware): void
     {
         $fullPath = $this->prefix . $path;
         $allMiddleware = array_merge($this->groupMiddleware, $middleware);
@@ -136,9 +136,19 @@ class Router
         });
     }
 
-    private function callHandler(callable|string $handler, Request $request, array $params): Response
+    private function callHandler(callable|string|array $handler, Request $request, array $params): Response
     {
-        if (is_string($handler)) {
+        if (is_array($handler)) {
+            [$class, $method] = $handler;
+            
+            if ($this->container !== null && $this->container->has($class)) {
+                $instance = $this->container->get($class);
+            } else {
+                $instance = new $class();
+            }
+            
+            $result = $instance->$method($request, ...$params);
+        } elseif (is_string($handler)) {
             [$class, $method] = explode('@', $handler);
             
             if ($this->container !== null && $this->container->has($class)) {
