@@ -12,6 +12,35 @@ Standards PHP modernes (2026)
 - Follow PSR-12 (style) and PSR-4 (autoloading); keep classes focused (SOLID, DRY, KISS, YAGNI).
 - Prefer typed exceptions and explicit input validation.
 
+Principes de design et architecture
+SOLID Principles:
+- Single Responsibility Principle (SRP): Each class/function has one reason to change.
+- Open/Closed Principle (OCP): Open for extension, closed for modification.
+- Liskov Substitution Principle (LSP): Subtypes must be substitutable for their base types.
+- Interface Segregation Principle (ISP): Clients shouldn't depend on interfaces they don't use.
+- Dependency Inversion Principle (DIP): Depend on abstractions, not concretions.
+
+Core Principles:
+- DRY (Don't Repeat Yourself): Eliminate duplication; centralize common logic.
+- KISS (Keep It Simple, Stupid): Prefer simple solutions over complex ones.
+- YAGNI (You Aren't Gonna Need It): Don't add functionality until needed.
+- Separation of Concerns: Each module addresses a separate concern.
+- Single Source of Truth: One authoritative source for each piece of data/logic.
+
+Design Patterns & Practices:
+- Composition over Inheritance: Favor object composition over class inheritance.
+- Tell, Don't Ask: Objects should act on their own data, not expose it for external manipulation.
+- Law of Demeter: Objects should only talk to their immediate friends, not strangers.
+- Principle of Least Knowledge: Minimize dependencies between modules.
+- Favor Immutability: Use immutable objects when possible to reduce side effects.
+
+Code Quality:
+- Explicit over Implicit: Make intentions clear through code, not hidden behavior.
+- Fail Fast: Detect and report errors as early as possible.
+- Defensive Programming: Validate inputs, handle edge cases, expect the unexpected.
+- Command Query Separation: Methods should either change state or return data, not both.
+- Prefer Exceptions over Error Codes: Use exceptions for error handling, not return codes.
+
 MySQL
 - Use prepared statements (PDO/MySQLi) for all queries; avoid dynamic SQL.
 - Wrap critical multi-step changes in transactions; avoid N+1 queries.
