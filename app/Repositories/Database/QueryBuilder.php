@@ -37,14 +37,27 @@ class QueryBuilder
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table) === 1;
     }
 
+    private function isValidColumnName(string $column): bool
+    {
+        return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $column) === 1;
+    }
+
     public function select(string ...$columns): self
     {
+        foreach ($columns as $column) {
+            if (!$this->isValidColumnName($column)) {
+                throw new \InvalidArgumentException("Invalid column name: {$column}");
+            }
+        }
         $this->selects = $columns;
         return $this;
     }
 
     public function where(string $column, string $operator, mixed $value): self
     {
+        if (!$this->isValidColumnName($column)) {
+            throw new \InvalidArgumentException("Invalid column name: {$column}");
+        }
         $this->wheres[] = [
             'column' => $column,
             'operator' => $operator,
@@ -57,6 +70,9 @@ class QueryBuilder
 
     public function orWhere(string $column, string $operator, mixed $value): self
     {
+        if (!$this->isValidColumnName($column)) {
+            throw new \InvalidArgumentException("Invalid column name: {$column}");
+        }
         $this->wheres[] = [
             'column' => $column,
             'operator' => $operator,
@@ -69,6 +85,9 @@ class QueryBuilder
 
     public function whereIn(string $column, array $values): self
     {
+        if (!$this->isValidColumnName($column)) {
+            throw new \InvalidArgumentException("Invalid column name: {$column}");
+        }
         $placeholders = implode(',', array_fill(0, count($values), '?'));
         $this->wheres[] = [
             'column' => $column,
@@ -82,18 +101,30 @@ class QueryBuilder
 
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        if (!$this->isValidColumnName($column)) {
+            throw new \InvalidArgumentException("Invalid column name: {$column}");
+        }
+        if (!in_array(strtoupper($direction), ['ASC', 'DESC'], true)) {
+            throw new \InvalidArgumentException("Invalid order direction: {$direction}");
+        }
         $this->orderBy = "{$column} {$direction}";
         return $this;
     }
 
     public function limit(int $limit): self
     {
+        if ($limit < 0) {
+            throw new \InvalidArgumentException("Limit must be a positive integer");
+        }
         $this->limit = $limit;
         return $this;
     }
 
     public function offset(int $offset): self
     {
+        if ($offset < 0) {
+            throw new \InvalidArgumentException("Offset must be a positive integer");
+        }
         $this->offset = $offset;
         return $this;
     }
@@ -101,6 +132,11 @@ class QueryBuilder
     public function insert(array $data): int
     {
         $this->type = 'insert';
+        foreach (array_keys($data) as $column) {
+            if (!$this->isValidColumnName($column)) {
+                throw new \InvalidArgumentException("Invalid column name: {$column}");
+            }
+        }
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         $bindings = array_values($data);
@@ -119,6 +155,9 @@ class QueryBuilder
         $this->type = 'update';
         $set = [];
         foreach (array_keys($data) as $column) {
+            if (!$this->isValidColumnName($column)) {
+                throw new \InvalidArgumentException("Invalid column name: {$column}");
+            }
             $set[] = "{$column} = ?";
         }
         $bindings = array_merge(array_values($data), $this->bindings);

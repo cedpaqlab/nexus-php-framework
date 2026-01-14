@@ -35,4 +35,9 @@ class SessionService
     {
         $_SESSION = [];
     }
+
+    public function regenerate(): void
+    {
+        session_regenerate_id(true);
+    }
 }

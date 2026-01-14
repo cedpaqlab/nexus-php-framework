@@ -53,6 +53,7 @@ class Validator
             'string' => $this->validateString($field, $value),
             'confirmed' => $this->validateConfirmed($field, $value, $data, $param),
             'unique' => $this->validateUnique($field, $value, $param),
+            'in' => $this->validateIn($field, $value, $param),
             default => null,
         };
     }
@@ -138,6 +139,21 @@ class Validator
 
         if ($count > 0) {
             return "The {$field} has already been taken.";
+        }
+
+        return null;
+    }
+
+    private function validateIn(string $field, mixed $value, ?string $param): ?string
+    {
+        if ($value === null || $param === null) {
+            return null;
+        }
+
+        $allowedValues = array_map('trim', explode(',', $param));
+
+        if (!in_array($value, $allowedValues, true)) {
+            return "The {$field} must be one of: " . implode(', ', $allowedValues);
         }
 
         return null;

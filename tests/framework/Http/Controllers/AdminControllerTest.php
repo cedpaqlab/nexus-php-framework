@@ -11,6 +11,7 @@ use App\Services\View\ViewRenderer;
 use App\Services\User\UserService;
 use App\Services\Session\SessionService;
 use App\Services\Security\CsrfService;
+use App\Services\Security\Validator;
 use App\Http\Response;
 
 class AdminControllerTest extends TestCase
@@ -18,6 +19,8 @@ class AdminControllerTest extends TestCase
     private AdminController $controller;
     private UserService $userService;
     private SessionService $session;
+    private Validator $validator;
+    private ViewRenderer $viewRenderer;
 
     protected function setUp(): void
     {
@@ -30,14 +33,18 @@ class AdminControllerTest extends TestCase
         $this->userService = $this->createMock(UserService::class);
         
         $csrfService = new CsrfService($this->session);
-        $viewRenderer = new ViewRenderer();
-        $viewRenderer->setCsrfService($csrfService);
+        $this->viewRenderer = new ViewRenderer();
+        $this->viewRenderer->setCsrfService($csrfService);
+        
+        $this->validator = $this->createMock(Validator::class);
+        $this->validator->method('validate')->willReturn([]);
         
         $this->controller = new AdminController(
-            $viewRenderer,
+            $this->viewRenderer,
             new Response(),
             $this->userService,
-            $this->session
+            $this->session,
+            $this->validator
         );
     }
 
@@ -87,6 +94,10 @@ class AdminControllerTest extends TestCase
 
     public function testCreateUserCreatesUser(): void
     {
+        $this->validator->expects($this->once())
+            ->method('validate')
+            ->willReturn([]);
+        
         $this->userService->expects($this->once())
             ->method('create')
             ->willReturn(1);

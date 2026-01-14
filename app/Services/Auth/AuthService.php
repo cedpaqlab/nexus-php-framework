@@ -36,6 +36,7 @@ class AuthService
 
     public function login(array $user): void
     {
+        $this->session->regenerate();
         $this->session->set('user_id', $user['id']);
         $this->session->set('user_email', $user['email']);
         $this->session->set('user_role', $user['role'] ?? 'user');

@@ -14,11 +14,6 @@ $container = require __DIR__ . '/../bootstrap/app.php';
 $request = $container->get(Request::class);
 $router = $container->get(Router::class);
 
-$securityConfig = Config::get('security');
-foreach ($securityConfig['headers'] as $header => $value) {
-    header("{$header}: {$value}");
-}
-
 require __DIR__ . '/../routes/web.php';
 
 $response = $router->dispatch($request);

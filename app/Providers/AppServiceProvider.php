@@ -21,6 +21,7 @@ use App\Http\Response;
 use App\Http\Router;
 use App\Http\Middlewares\SuperAdminMiddleware;
 use App\Http\Middlewares\AuthMiddleware;
+use App\Http\Middlewares\SecurityHeadersMiddleware;
 use Container;
 use PDO;
 
@@ -150,6 +151,10 @@ class AppServiceProvider extends ServiceProvider
                 $container->get(CsrfService::class),
                 $container->make(Response::class)
             );
+        });
+
+        $this->container->singleton(SecurityHeadersMiddleware::class, function () {
+            return new SecurityHeadersMiddleware();
         });
     }
 }

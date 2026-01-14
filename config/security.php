@@ -28,6 +28,6 @@ return [
         'X-Frame-Options' => 'DENY',
         'X-XSS-Protection' => '1; mode=block',
         'Referrer-Policy' => 'strict-origin-when-cross-origin',
-        'Content-Security-Policy' => "default-src 'self'",
+        'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'unsafe-inline' https://code.jquery.com; style-src 'self' 'unsafe-inline';",
     ],
 ];

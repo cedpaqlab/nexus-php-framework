@@ -10,6 +10,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Middlewares\SuperAdminMiddleware;
 use App\Http\Middlewares\AuthMiddleware;
 use App\Http\Middlewares\CsrfMiddleware;
+use App\Http\Middlewares\SecurityHeadersMiddleware;
+
+$router->middleware([SecurityHeadersMiddleware::class]);
 
 $router->get('/', [HomeController::class, 'index']);
 

@@ -58,7 +58,7 @@ class UserService
 
     public function updateRole(int $id, string $role): int
     {
-        if (!in_array($role, ['user', 'admin'], true)) {
+        if (!in_array($role, ['user', 'admin', 'super_admin'], true)) {
             throw new \InvalidArgumentException("Invalid role: {$role}");
         }
 

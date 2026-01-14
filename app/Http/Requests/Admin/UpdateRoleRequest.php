@@ -11,7 +11,7 @@ class UpdateRoleRequest extends BaseRequest
     protected function rules(): array
     {
         return [
-            'role' => 'required|string',
+            'role' => 'required|string|in:user,admin,super_admin',
         ];
     }
 }

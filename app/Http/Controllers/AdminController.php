@@ -9,6 +9,10 @@ use App\Http\Response;
 use App\Services\View\ViewRenderer;
 use App\Services\User\UserService;
 use App\Services\Session\SessionService;
+use App\Services\Security\Validator;
+use App\Http\Requests\Admin\CreateUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Http\Requests\Admin\UpdateRoleRequest;
 
 class AdminController
 {
@@ -16,7 +20,8 @@ class AdminController
         private ViewRenderer $viewRenderer,
         private Response $response,
         private UserService $userService,
-        private SessionService $session
+        private SessionService $session,
+        private Validator $validator
     ) {
     }
 
@@ -44,8 +49,13 @@ class AdminController
 
     public function users(Request $request): Response
     {
+        $role = $request->get('role', '');
+        if ($role !== '' && !in_array($role, ['user', 'admin', 'super_admin'], true)) {
+            $role = '';
+        }
+        
         $filters = [
-            'role' => $request->get('role', ''),
+            'role' => $role,
         ];
 
         $users = $this->userService->getAllUsers($filters);
@@ -61,13 +71,23 @@ class AdminController
     public function createUser(Request $request): Response
     {
         if ($request->method() === 'POST') {
+            $formRequest = new CreateUserRequest($request, $this->validator, $this->response);
+            $validationResult = $formRequest->validate();
+            
+            if ($validationResult instanceof Response) {
+                return $validationResult;
+            }
+            
+            $data = $validationResult;
+            $data['role'] = $data['role'] ?? 'user';
+            
             try {
-                $data = $request->all();
-                $data['role'] = $data['role'] ?? 'user';
                 $id = $this->userService->create($data);
                 return $this->response->json(['success' => true, 'id' => $id], 201);
+            } catch (\InvalidArgumentException $e) {
+                return $this->response->json(['success' => false, 'error' => 'Validation failed'], 400);
             } catch (\Exception $e) {
-                return $this->response->json(['success' => false, 'error' => $e->getMessage()], 400);
+                return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
             }
         }
 
@@ -85,12 +105,24 @@ class AdminController
         }
 
         if ($request->method() === 'PUT' || $request->method() === 'POST') {
+            $formRequest = new UpdateUserRequest($request, $this->validator, $this->response);
+            $validationResult = $formRequest->validate();
+            
+            if ($validationResult instanceof Response) {
+                return $validationResult;
+            }
+            
+            $data = $validationResult;
+            
             try {
-                $data = $request->all();
                 $this->userService->update($userId, $data);
                 return $this->response->json(['success' => true]);
+            } catch (\InvalidArgumentException $e) {
+                return $this->response->json(['success' => false, 'error' => 'Validation failed'], 400);
+            } catch (\RuntimeException $e) {
+                return $this->response->json(['success' => false, 'error' => 'User not found'], 404);
             } catch (\Exception $e) {
-                return $this->response->json(['success' => false, 'error' => $e->getMessage()], 400);
+                return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
             }
         }
 
@@ -105,21 +137,35 @@ class AdminController
         try {
             $this->userService->delete($userId);
             return $this->response->json(['success' => true]);
+        } catch (\RuntimeException $e) {
+            return $this->response->json(['success' => false, 'error' => 'User not found'], 404);
         } catch (\Exception $e) {
-            return $this->response->json(['success' => false, 'error' => $e->getMessage()], 400);
+            return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
         }
     }
 
     public function updateRole(Request $request, string $id): Response
     {
         $userId = (int) $id;
-        $role = $request->get('role', '');
+        
+        $formRequest = new UpdateRoleRequest($request, $this->validator, $this->response);
+        $validationResult = $formRequest->validate();
+        
+        if ($validationResult instanceof Response) {
+            return $validationResult;
+        }
+        
+        $role = $validationResult['role'] ?? '';
 
         try {
             $this->userService->updateRole($userId, $role);
             return $this->response->json(['success' => true]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->response->json(['success' => false, 'error' => 'Invalid role'], 400);
+        } catch (\RuntimeException $e) {
+            return $this->response->json(['success' => false, 'error' => 'User not found'], 404);
         } catch (\Exception $e) {
-            return $this->response->json(['success' => false, 'error' => $e->getMessage()], 400);
+            return $this->response->json(['success' => false, 'error' => 'An error occurred'], 500);
         }
     }
 }
