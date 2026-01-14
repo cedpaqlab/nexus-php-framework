@@ -19,3 +19,5 @@ docker-compose.override.yml
 # Propel generated files
 /generated-classes/
 /generated-conf/
+/app/Models/Base/
+/app/Models/Map/
