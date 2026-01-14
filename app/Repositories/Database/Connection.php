@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Database;
 
+use Config;
 use PDO;
 use PDOException;
 
@@ -28,8 +29,9 @@ class Connection
 
     private static function create(): PDO
     {
-        $config = require __DIR__ . '/../../../config/database.php';
-        $connection = $config['connections'][self::$connection] ?? $config['connections']['mysql'];
+        require_once __DIR__ . '/../../../config/loader.php';
+        $config = Config::get('database.connections');
+        $connection = $config[self::$connection] ?? $config['mysql'];
 
         $dsn = sprintf(
             'mysql:host=%s;port=%d;dbname=%s;charset=%s',

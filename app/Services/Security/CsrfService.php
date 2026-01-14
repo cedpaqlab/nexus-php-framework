@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Security;
 
+use Config;
+
 class CsrfService
 {
     private string $tokenName;
@@ -11,9 +13,8 @@ class CsrfService
 
     public function __construct()
     {
-        $config = require __DIR__ . '/../../../config/security.php';
-        $this->tokenName = $config['csrf']['token_name'];
-        $this->tokenLifetime = $config['csrf']['token_lifetime'];
+        $this->tokenName = Config::get('security.csrf.token_name', '_csrf_token');
+        $this->tokenLifetime = Config::get('security.csrf.token_lifetime', 3600);
     }
 
     public function generate(): string

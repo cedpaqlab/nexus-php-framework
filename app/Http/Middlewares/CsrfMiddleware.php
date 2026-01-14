@@ -10,11 +10,10 @@ use App\Services\Security\CsrfService;
 
 class CsrfMiddleware implements MiddlewareInterface
 {
-    private CsrfService $csrfService;
-
-    public function __construct(?CsrfService $csrfService = null)
-    {
-        $this->csrfService = $csrfService ?? new CsrfService();
+    public function __construct(
+        private CsrfService $csrfService,
+        private Response $response
+    ) {
     }
 
     public function handle(Request $request, callable $next): Response
@@ -26,7 +25,7 @@ class CsrfMiddleware implements MiddlewareInterface
         $token = $request->get('_csrf_token') ?? $request->header('X-CSRF-Token');
 
         if (!$token || !$this->csrfService->validate($token)) {
-            return (new Response())->forbidden('Invalid CSRF token');
+            return $this->response->forbidden('Invalid CSRF token');
         }
 
         return $next($request);

@@ -19,7 +19,7 @@ class AuthMiddlewareTest extends TestCase
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->middleware = new AuthMiddleware();
+        $this->middleware = new AuthMiddleware(new Response());
     }
 
     public function testAuthenticatedUserPasses(): void

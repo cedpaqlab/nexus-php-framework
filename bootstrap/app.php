@@ -8,11 +8,14 @@ require_once __DIR__ . '/../config/loader.php';
 require_once __DIR__ . '/container.php';
 require_once __DIR__ . '/error_handler.php';
 
+use App\Services\Helpers\PathHelper;
+
+PathHelper::setBasePath(dirname(__DIR__));
+
 date_default_timezone_set(Config::get('app.timezone', 'UTC'));
 
 if (session_status() === PHP_SESSION_NONE) {
-    $config = require __DIR__ . '/../config/security.php';
-    $sessionConfig = $config['session'];
+    $sessionConfig = Config::get('security.session');
 
     session_set_cookie_params([
         'lifetime' => $sessionConfig['lifetime'],
@@ -50,6 +53,16 @@ $container->singleton(\App\Services\Logger\Logger::class, function () {
 
 $container->singleton(\App\Services\View\ViewRenderer::class, function () {
     return new \App\Services\View\ViewRenderer();
+});
+
+$container->singleton(\App\Http\Request::class, function () {
+    return new \App\Http\Request();
+});
+
+$container->singleton(\App\Http\Router::class, function (Container $container) {
+    $router = new \App\Http\Router();
+    $router->setContainer($container);
+    return $router;
 });
 
 return $container;

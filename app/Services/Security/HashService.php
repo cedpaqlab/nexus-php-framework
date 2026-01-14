@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Security;
 
+use Config;
+
 class HashService
 {
     private string $algo;
@@ -11,9 +13,8 @@ class HashService
 
     public function __construct()
     {
-        $config = require __DIR__ . '/../../../config/security.php';
-        $this->algo = $config['password']['algo'];
-        $this->options = $config['password']['options'];
+        $this->algo = Config::get('security.password.algo', PASSWORD_DEFAULT);
+        $this->options = Config::get('security.password.options', []);
     }
 
     public function make(string $password): string

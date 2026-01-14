@@ -140,23 +140,11 @@ class Router
     {
         if (is_array($handler)) {
             [$class, $method] = $handler;
-            
-            if ($this->container !== null && $this->container->has($class)) {
-                $instance = $this->container->get($class);
-            } else {
-                $instance = new $class();
-            }
-            
+            $instance = $this->resolveInstance($class);
             $result = $instance->$method($request, ...$params);
         } elseif (is_string($handler)) {
             [$class, $method] = explode('@', $handler);
-            
-            if ($this->container !== null && $this->container->has($class)) {
-                $instance = $this->container->get($class);
-            } else {
-                $instance = new $class();
-            }
-            
+            $instance = $this->resolveInstance($class);
             $result = $instance->$method($request, ...$params);
         } else {
             $result = $handler($request, ...$params);
@@ -167,5 +155,14 @@ class Router
         }
 
         return (new Response())->json($result);
+    }
+
+    private function resolveInstance(string $class): object
+    {
+        if ($this->container !== null && $this->container->has($class)) {
+            return $this->container->get($class);
+        }
+
+        return new $class();
     }
 }

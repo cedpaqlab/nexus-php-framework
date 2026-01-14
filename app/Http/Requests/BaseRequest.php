@@ -12,11 +12,13 @@ abstract class BaseRequest
 {
     protected Request $request;
     protected Validator $validator;
+    protected Response $response;
 
-    public function __construct(Request $request, Validator $validator)
+    public function __construct(Request $request, Validator $validator, Response $response)
     {
         $this->request = $request;
         $this->validator = $validator;
+        $this->response = $response;
     }
 
     abstract protected function rules(): array;
@@ -29,7 +31,7 @@ abstract class BaseRequest
         $errors = $this->validator->validate($data, $rules);
 
         if (!empty($errors)) {
-            return (new Response())->json(['errors' => $errors], 422);
+            return $this->response->json(['errors' => $errors], 422);
         }
 
         return $data;

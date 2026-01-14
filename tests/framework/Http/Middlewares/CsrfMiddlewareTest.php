@@ -22,7 +22,7 @@ class CsrfMiddlewareTest extends TestCase
             session_start();
         }
         $this->csrfService = new CsrfService();
-        $this->middleware = new CsrfMiddleware($this->csrfService);
+        $this->middleware = new CsrfMiddleware($this->csrfService, new Response());
     }
 
     public function testGetRequestPassesThrough(): void

@@ -9,10 +9,15 @@ use App\Http\Response;
 
 class AuthMiddleware implements MiddlewareInterface
 {
+    public function __construct(
+        private Response $response
+    ) {
+    }
+
     public function handle(Request $request, callable $next): Response
     {
         if (!$this->isAuthenticated($request)) {
-            return (new Response())->unauthorized();
+            return $this->response->unauthorized();
         }
 
         return $next($request);

@@ -11,13 +11,14 @@ use App\Services\View\ViewRenderer;
 class HomeController
 {
     public function __construct(
-        private ViewRenderer $viewRenderer
+        private ViewRenderer $viewRenderer,
+        private Response $response
     ) {
     }
 
     public function index(Request $request): Response
     {
         $html = $this->viewRenderer->render('home');
-        return (new Response())->html($html);
+        return $this->response->html($html);
     }
 }

@@ -3,37 +3,42 @@
 declare(strict_types=1);
 
 use App\Services\Logger\Logger;
+use Config;
 
-set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
+static $logger = null;
+
+if ($logger === null) {
+    $logger = new Logger();
+}
+
+set_error_handler(function (int $severity, string $message, string $file, int $line) use (&$logger): bool {
     if (!(error_reporting() & $severity)) {
         return false;
     }
 
-    $logger = new Logger();
     $logger->error("Error: {$message} in {$file} on line {$line}");
 
-    $config = require __DIR__ . '/../config/app.php';
+    $debug = Config::get('app.debug', false);
 
-    if ($config['debug']) {
+    if ($debug) {
         echo "<pre>Error: {$message}\nFile: {$file}\nLine: {$line}</pre>";
     }
 
     return true;
 });
 
-set_exception_handler(function (Throwable $exception): void {
-    $logger = new Logger();
+set_exception_handler(function (Throwable $exception) use (&$logger): void {
     $logger->critical("Uncaught exception: " . $exception->getMessage(), [
         'file' => $exception->getFile(),
         'line' => $exception->getLine(),
         'trace' => $exception->getTraceAsString(),
     ]);
 
-    $config = require __DIR__ . '/../config/app.php';
-
     http_response_code(500);
 
-    if ($config['debug']) {
+    $debug = Config::get('app.debug', false);
+
+    if ($debug) {
         echo "<pre>Uncaught Exception: " . get_class($exception) . "\n";
         echo "Message: {$exception->getMessage()}\n";
         echo "File: {$exception->getFile()}\n";

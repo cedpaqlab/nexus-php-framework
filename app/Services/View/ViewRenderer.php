@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\View;
 
+use App\Services\Helpers\PathHelper;
+
 class ViewRenderer
 {
     private string $viewsPath;
@@ -11,7 +13,7 @@ class ViewRenderer
 
     public function __construct(string $viewsPath = null)
     {
-        $this->viewsPath = $viewsPath ?? __DIR__ . '/../../../resources/views';
+        $this->viewsPath = $viewsPath ?? PathHelper::resourcesPath('views');
     }
 
     public function render(string $view, array $data = []): string

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Logger;
 
+use App\Services\Helpers\PathHelper;
+
 class Logger
 {
     private string $channel;
@@ -13,7 +15,7 @@ class Logger
     public function __construct(string $channel = 'file')
     {
         $this->channel = $channel;
-        $this->logPath = __DIR__ . '/../../../storage/logs';
+        $this->logPath = PathHelper::storagePath('logs');
         $this->level = $_ENV['LOG_LEVEL'] ?? 'debug';
 
         if (!is_dir($this->logPath)) {
