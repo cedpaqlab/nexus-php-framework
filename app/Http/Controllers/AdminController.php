@@ -87,9 +87,13 @@ class AdminController
             } catch (\InvalidArgumentException $e) {
                 $message = $e->getMessage();
                 if (str_contains($message, 'json_encode')) {
-                    $decoded = json_decode(str_replace('Validation failed: ', '', $message), true);
-                    if (is_array($decoded)) {
-                        return $this->response->json(['success' => false, 'errors' => $decoded], 422);
+                    $jsonString = str_replace('Validation failed: ', '', $message);
+                    // PHP 8.3: Use json_validate() for efficient validation
+                    if (json_validate($jsonString)) {
+                        $decoded = json_decode($jsonString, true);
+                        if (is_array($decoded)) {
+                            return $this->response->json(['success' => false, 'errors' => $decoded], 422);
+                        }
                     }
                 }
                 return $this->response->json(['success' => false, 'error' => $message], 400);

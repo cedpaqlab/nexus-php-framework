@@ -110,6 +110,12 @@ class Request
         }
 
         $content = file_get_contents('php://input');
+        
+        // PHP 8.3: Use json_validate() for efficient validation before decoding
+        if (!json_validate($content)) {
+            return [];
+        }
+        
         $data = json_decode($content, true);
 
         return is_array($data) ? $data : [];
