@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'default' => 'mysql',
+    'connector' => $_ENV['DB_CONNECTOR'] ?? 'querybuilder',
     'connections' => [
         'mysql' => [
             'driver' => 'mysql',

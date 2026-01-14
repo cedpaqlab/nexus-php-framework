@@ -35,6 +35,10 @@ $container->singleton(\App\Repositories\Database\Connection::class, function () 
     return \App\Repositories\Database\Connection::getInstance();
 });
 
+$container->singleton(\App\Repositories\Contracts\DatabaseConnectorInterface::class, function () {
+    return \App\Repositories\Factory\ConnectorFactory::create();
+});
+
 $container->singleton(\App\Services\Security\CsrfService::class, function () {
     return new \App\Services\Security\CsrfService();
 });
