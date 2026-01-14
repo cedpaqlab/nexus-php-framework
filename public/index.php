@@ -7,7 +7,6 @@ require_once __DIR__ . '/../bootstrap/app.php';
 use App\Http\Request;
 use App\Http\Response;
 use App\Http\Router;
-use Config;
 
 $container = require __DIR__ . '/../bootstrap/app.php';
 $request = new Request();

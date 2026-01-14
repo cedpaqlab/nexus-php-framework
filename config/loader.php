@@ -12,15 +12,26 @@ class Config
             return self::$cache[$key];
         }
 
-        [$file, $path] = explode('.', $key, 2);
+        $parts = explode('.', $key, 2);
+        $file = $parts[0];
+        $path = $parts[1] ?? null;
+
         $configFile = __DIR__ . '/' . $file . '.php';
 
         if (!file_exists($configFile)) {
             return $default;
         }
 
-        $config = require $configFile;
-        self::$cache[$file] = $config;
+        if (isset(self::$cache[$file])) {
+            $config = self::$cache[$file];
+        } else {
+            $config = require $configFile;
+            self::$cache[$file] = $config;
+        }
+
+        if ($path === null) {
+            return $config;
+        }
 
         $keys = explode('.', $path);
         $value = $config;

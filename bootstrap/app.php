@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/autoloader.php';
+require_once __DIR__ . '/../config/loader.php';
+require_once __DIR__ . '/container.php';
 require_once __DIR__ . '/error_handler.php';
-
-use Config;
-use Container;
 
 date_default_timezone_set(Config::get('app.timezone', 'UTC'));
 
