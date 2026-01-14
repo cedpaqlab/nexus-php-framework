@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Support;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
+use App\Repositories\Database\Connection;
 
 abstract class TestCase extends PHPUnitTestCase
 {
@@ -37,6 +38,10 @@ abstract class TestCase extends PHPUnitTestCase
         if (!class_exists('Config')) {
             require_once __DIR__ . '/../../config/loader.php';
         }
+        
+        // Use testing database connection for tests
+        Connection::reset();
+        Connection::setConnection('testing');
     }
 
     protected function tearDown(): void
