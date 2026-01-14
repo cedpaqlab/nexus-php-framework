@@ -3,6 +3,7 @@ Règle #1
 
 Philosophie
 - Deliver optimized, maintainable code on first pass; avoid refactors through upfront rigor.
+- Optimize directly for evolution; no "simple initial" structure - build for scalability from the start.
 - Validate a clear plan with the user before any code change.
 - Think globally about impact, security, and performance before delivery.
 
