@@ -38,7 +38,9 @@ class MigrationRunner
         $pendingMigrations = array_diff($availableMigrations, $executedMigrations);
         
         if (empty($pendingMigrations)) {
-            echo "No pending migrations.\n";
+            if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+                echo "No pending migrations.\n";
+            }
             return;
         }
 
@@ -56,7 +58,9 @@ class MigrationRunner
         $executedMigrations = $this->getExecutedMigrations();
         
         if (empty($executedMigrations)) {
-            echo "No migrations to rollback.\n";
+            if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+                echo "No migrations to rollback.\n";
+            }
             return;
         }
 
@@ -138,14 +142,18 @@ class MigrationRunner
             throw new \RuntimeException("Migration must implement MigrationInterface: {$className}");
         }
 
-        echo "Running migration: {$migration}...\n";
+        if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+            echo "Running migration: {$migration}...\n";
+        }
 
         $this->connector->executeInTransaction(function () use ($instance, $migration) {
             $instance->up($this->connector);
             $this->recordMigration($migration);
         });
 
-        echo "Migration completed: {$migration}\n";
+        if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+            echo "Migration completed: {$migration}\n";
+        }
     }
 
     private function rollbackMigration(string $migration): void
@@ -169,7 +177,9 @@ class MigrationRunner
             throw new \RuntimeException("Migration must implement MigrationInterface: {$className}");
         }
 
-        echo "Rolling back migration: {$migration}...\n";
+        if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+            echo "Rolling back migration: {$migration}...\n";
+        }
 
         try {
             $this->connector->executeInTransaction(function () use ($instance, $migration) {
@@ -185,13 +195,17 @@ class MigrationRunner
             });
         } catch (\Throwable $e) {
             if (str_contains($e->getMessage(), "doesn't exist") || str_contains($e->getMessage(), "Base table")) {
-                echo "Migration table already dropped.\n";
+                if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+                    echo "Migration table already dropped.\n";
+                }
                 return;
             }
             throw $e;
         }
 
-        echo "Rollback completed: {$migration}\n";
+        if (!isset($_ENV['PHPUNIT_RUNNING']) || $_ENV['PHPUNIT_RUNNING'] !== '1') {
+            echo "Rollback completed: {$migration}\n";
+        }
     }
 
     private function getMigrationClassName(string $migration): string

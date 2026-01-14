@@ -19,6 +19,9 @@ class CreateMigrationsTableTest extends DatabaseTestCase
     {
         parent::setUp();
         
+        $migrationFile = __DIR__ . '/../../../../database/migrations/20240101000000_CreateMigrationsTable.php';
+        require_once $migrationFile;
+        
         $connection = new Connection();
         $factory = new ConnectorFactory($connection);
         $this->connector = $factory->create();

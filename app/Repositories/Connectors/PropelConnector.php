@@ -36,10 +36,19 @@ class PropelConnector implements DatabaseConnectorInterface
         $serviceContainer->setDefaultDatasource('default');
         
         $manager = new ConnectionManagerSingle('default');
+        
+        if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') {
+            $username = $_ENV['DB_TEST_USERNAME'] ?? $_ENV['DB_USERNAME'] ?? 'root';
+            $password = $_ENV['DB_TEST_PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '';
+        } else {
+            $username = $_ENV['DB_USERNAME'] ?? 'root';
+            $password = $_ENV['DB_PASSWORD'] ?? '';
+        }
+        
         $manager->setConfiguration([
             'dsn' => $this->buildDsn(),
-            'user' => $_ENV['DB_USERNAME'] ?? 'root',
-            'password' => $_ENV['DB_PASSWORD'] ?? '',
+            'user' => $username,
+            'password' => $password,
             'settings' => [
                 'charset' => 'utf8mb4',
                 'queries' => [
@@ -53,9 +62,15 @@ class PropelConnector implements DatabaseConnectorInterface
 
     private function buildDsn(): string
     {
-        $host = $_ENV['DB_HOST'] ?? '127.0.0.1';
-        $port = (int) ($_ENV['DB_PORT'] ?? 3306);
-        $database = $_ENV['DB_DATABASE'] ?? '';
+        if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') {
+            $host = $_ENV['DB_TEST_HOST'] ?? $_ENV['DB_HOST'] ?? '127.0.0.1';
+            $port = (int) ($_ENV['DB_TEST_PORT'] ?? $_ENV['DB_PORT'] ?? 3306);
+            $database = $_ENV['DB_TEST_DATABASE'] ?? ($_ENV['DB_DATABASE'] ?? '') . '_test';
+        } else {
+            $host = $_ENV['DB_HOST'] ?? '127.0.0.1';
+            $port = (int) ($_ENV['DB_PORT'] ?? 3306);
+            $database = $_ENV['DB_DATABASE'] ?? '';
+        }
         
         return sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $host, $port, $database);
     }

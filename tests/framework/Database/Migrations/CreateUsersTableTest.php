@@ -19,6 +19,9 @@ class CreateUsersTableTest extends DatabaseTestCase
     {
         parent::setUp();
         
+        $migrationFile = __DIR__ . '/../../../../database/migrations/20240101000001_CreateUsersTable.php';
+        require_once $migrationFile;
+        
         $connection = new Connection();
         $factory = new ConnectorFactory($connection);
         $this->connector = $factory->create();
@@ -91,8 +94,11 @@ class CreateUsersTableTest extends DatabaseTestCase
         
         $this->migration->up($this->connector);
         
-        $columns = $this->pdo->query("DESCRIBE users WHERE Field = 'role'")->fetch(\PDO::FETCH_ASSOC);
-        $this->assertStringContainsString("enum('user','admin','super_admin')", strtolower($columns['Type']));
+        $stmt = $this->pdo->query("DESCRIBE users");
+        $columns = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $roleColumn = array_filter($columns, fn($col) => $col['Field'] === 'role');
+        $roleColumn = reset($roleColumn);
+        $this->assertStringContainsString("enum('user','admin','super_admin')", strtolower($roleColumn['Type']));
     }
 
     public function testUpSetsDefaultRoleToUser(): void
@@ -101,8 +107,11 @@ class CreateUsersTableTest extends DatabaseTestCase
         
         $this->migration->up($this->connector);
         
-        $columns = $this->pdo->query("DESCRIBE users WHERE Field = 'role'")->fetch(\PDO::FETCH_ASSOC);
-        $this->assertEquals('user', $columns['Default']);
+        $stmt = $this->pdo->query("DESCRIBE users");
+        $columns = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $roleColumn = array_filter($columns, fn($col) => $col['Field'] === 'role');
+        $roleColumn = reset($roleColumn);
+        $this->assertEquals('user', $roleColumn['Default']);
     }
 
     public function testUpEnforcesEmailUniqueness(): void

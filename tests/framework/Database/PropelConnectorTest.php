@@ -34,6 +34,8 @@ class PropelConnectorTest extends TestCase
     private function createTestTable(): void
     {
         try {
+            Connection::reset();
+            Connection::setConnection('testing');
             $pdo = Connection::getInstance();
             $pdo->exec("
                 CREATE TABLE IF NOT EXISTS test_propel_users (

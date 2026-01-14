@@ -106,10 +106,10 @@ class MigrationRunnerTest extends DatabaseTestCase
         $method->setAccessible(true);
         
         $className = $method->invoke($this->runner, '20240101000000_CreateMigrationsTable');
-        $this->assertEquals('CreateMigrationsTable', $className);
+        $this->assertEquals('Database\\Migrations\\CreateMigrationsTable', $className);
         
         $className = $method->invoke($this->runner, '20240101000001_CreateUsersTable');
-        $this->assertEquals('CreateUsersTable', $className);
+        $this->assertEquals('Database\\Migrations\\CreateUsersTable', $className);
     }
 
     public function testRunExecutesPendingMigrations(): void

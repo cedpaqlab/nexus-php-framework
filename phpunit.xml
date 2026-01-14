@@ -31,5 +31,6 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="DB_TEST_DATABASE" value="php_framework_test" force="false"/>
+        <env name="PHPUNIT_RUNNING" value="1"/>
     </php>
 </phpunit>
