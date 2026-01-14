@@ -28,7 +28,9 @@ abstract class DatabaseTestCase extends TestCase
 
     protected function tearDown(): void
     {
-        $this->transaction->rollback();
+        if ($this->pdo->inTransaction()) {
+            $this->transaction->rollback();
+        }
         parent::tearDown();
     }
 }

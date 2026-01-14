@@ -25,6 +25,12 @@ class TransactionTest extends TestCase
         }
         $this->transaction = new Transaction($this->pdo);
         $this->createTestTable();
+        $this->cleanTable();
+    }
+
+    private function cleanTable(): void
+    {
+        $this->pdo->exec("TRUNCATE TABLE test_transactions");
     }
 
     private function createTestTable(): void

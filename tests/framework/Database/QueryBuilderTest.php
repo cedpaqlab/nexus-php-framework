@@ -17,6 +17,7 @@ class QueryBuilderTest extends DatabaseTestCase
         parent::setUp();
         $this->builder = new QueryBuilder($this->pdo);
         $this->createTestTable();
+        $this->cleanTable();
     }
 
     private function createTestTable(): void
@@ -30,6 +31,11 @@ class QueryBuilderTest extends DatabaseTestCase
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ");
+    }
+
+    private function cleanTable(): void
+    {
+        $this->pdo->exec("DELETE FROM test_users");
     }
 
     public function testInsert(): void

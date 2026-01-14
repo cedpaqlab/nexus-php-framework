@@ -95,11 +95,13 @@ class QueryBuilder
         $this->type = 'insert';
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
-        $this->bindings = array_values($data);
+        $bindings = array_values($data);
 
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
+        
+        $this->reset();
 
         return (int) $this->pdo->lastInsertId();
     }
@@ -111,13 +113,15 @@ class QueryBuilder
         foreach (array_keys($data) as $column) {
             $set[] = "{$column} = ?";
         }
-        $this->bindings = array_merge(array_values($data), $this->bindings);
+        $bindings = array_merge(array_values($data), $this->bindings);
 
         $sql = "UPDATE {$this->table} SET " . implode(', ', $set);
         $sql .= $this->buildWhereClause();
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
+        
+        $this->reset();
 
         return $stmt->rowCount();
     }
@@ -125,11 +129,14 @@ class QueryBuilder
     public function delete(): int
     {
         $this->type = 'delete';
+        $bindings = $this->bindings;
         $sql = "DELETE FROM {$this->table}";
         $sql .= $this->buildWhereClause();
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
+        
+        $this->reset();
 
         return $stmt->rowCount();
     }
@@ -137,27 +144,37 @@ class QueryBuilder
     public function get(): array
     {
         $sql = $this->buildSelectQuery();
+        $bindings = $this->bindings;
+        $this->reset();
+        
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function first(): ?array
     {
+        $limit = $this->limit;
         $this->limit(1);
         $results = $this->get();
+        if ($limit !== null) {
+            $this->limit = $limit;
+        }
         return $results[0] ?? null;
     }
 
     public function count(): int
     {
+        $bindings = $this->bindings;
         $sql = "SELECT COUNT(*) as count FROM {$this->table}";
         $sql .= $this->buildWhereClause();
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $this->reset();
 
         return (int) ($result['count'] ?? 0);
     }
@@ -203,5 +220,16 @@ class QueryBuilder
         }
 
         return ' WHERE ' . implode('', $clauses);
+    }
+
+    private function reset(): void
+    {
+        $this->selects = ['*'];
+        $this->wheres = [];
+        $this->bindings = [];
+        $this->orderBy = null;
+        $this->limit = null;
+        $this->offset = null;
+        $this->type = 'select';
     }
 }
