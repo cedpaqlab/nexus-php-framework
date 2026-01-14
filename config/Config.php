@@ -52,4 +52,9 @@ class Config
     {
         return self::get($key) !== null;
     }
+    
+    public static function clearCache(): void
+    {
+        self::$cache = [];
+    }
 }

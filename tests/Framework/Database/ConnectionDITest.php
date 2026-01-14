@@ -10,18 +10,40 @@ use PDO;
 
 class ConnectionDITest extends TestCase
 {
-    private function skipIfNoDatabase(): void
+    private function ensureTestDatabase(): void
     {
+        $this->createTestDatabaseIfNeeded();
+    }
+    
+    private function createTestDatabaseIfNeeded(): void
+    {
+        $config = \Config\Config::get('database.connections.testing');
+        if (!$config || empty($config['database'])) {
+            return;
+        }
+        
+        $dbName = $config['database'];
+        $host = $config['host'];
+        $port = $config['port'];
+        $username = $config['username'];
+        $password = $config['password'];
+        
         try {
-            Connection::getInstance();
-        } catch (\RuntimeException $e) {
-            $this->markTestSkipped('Database not available: ' . $e->getMessage());
+            $adminPdo = new PDO(
+                sprintf('mysql:host=%s;port=%d', $host, $port),
+                $username,
+                $password,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+            );
+            $adminPdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}`");
+        } catch (\PDOException $e) {
+            // Ignore if DB already exists or connection fails
         }
     }
 
     public function testConnectionCanBeInstantiatedWithDI(): void
     {
-        $this->skipIfNoDatabase();
+        $this->ensureTestDatabase();
         
         // Connection should be instantiable without static getInstance()
         // Use testing connection configured in setUp()
@@ -33,7 +55,7 @@ class ConnectionDITest extends TestCase
 
     public function testConnectionReturnsSamePdoInstance(): void
     {
-        $this->skipIfNoDatabase();
+        $this->ensureTestDatabase();
         
         $connection = new Connection('testing');
         $pdo1 = $connection->getPdo();
@@ -44,7 +66,7 @@ class ConnectionDITest extends TestCase
 
     public function testMultipleConnectionInstancesCanExist(): void
     {
-        $this->skipIfNoDatabase();
+        $this->ensureTestDatabase();
         
         $connection1 = new Connection('testing');
         $connection2 = new Connection('testing');
@@ -55,7 +77,7 @@ class ConnectionDITest extends TestCase
 
     public function testConnectionCanBeInjected(): void
     {
-        $this->skipIfNoDatabase();
+        $this->ensureTestDatabase();
         
         // Test that Connection can be injected via constructor
         $testClass = new class($connection = new Connection('testing')) {

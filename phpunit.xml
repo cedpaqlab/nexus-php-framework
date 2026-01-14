@@ -21,7 +21,11 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="DB_TEST_HOST" value="127.0.0.1" force="false"/>
+        <env name="DB_TEST_PORT" value="3307" force="false"/>
         <env name="DB_TEST_DATABASE" value="php_framework_test" force="false"/>
+        <env name="DB_TEST_USERNAME" value="php_framework" force="false"/>
+        <env name="DB_TEST_PASSWORD" value="secret" force="false"/>
         <env name="PHPUNIT_RUNNING" value="1"/>
     </php>
 </phpunit>

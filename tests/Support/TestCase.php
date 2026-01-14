@@ -13,7 +13,29 @@ abstract class TestCase extends PHPUnitTestCase
     {
         parent::setUp();
         
-        // Load environment variables if not already loaded
+        // Ensure PHPUnit environment variables are loaded first
+        if (getenv('DB_TEST_DATABASE')) {
+            $_ENV['DB_TEST_DATABASE'] = getenv('DB_TEST_DATABASE');
+            $_SERVER['DB_TEST_DATABASE'] = getenv('DB_TEST_DATABASE');
+        }
+        if (getenv('DB_TEST_USERNAME')) {
+            $_ENV['DB_TEST_USERNAME'] = getenv('DB_TEST_USERNAME');
+            $_SERVER['DB_TEST_USERNAME'] = getenv('DB_TEST_USERNAME');
+        }
+        if (getenv('DB_TEST_PASSWORD')) {
+            $_ENV['DB_TEST_PASSWORD'] = getenv('DB_TEST_PASSWORD');
+            $_SERVER['DB_TEST_PASSWORD'] = getenv('DB_TEST_PASSWORD');
+        }
+        if (getenv('DB_TEST_HOST')) {
+            $_ENV['DB_TEST_HOST'] = getenv('DB_TEST_HOST');
+            $_SERVER['DB_TEST_HOST'] = getenv('DB_TEST_HOST');
+        }
+        if (getenv('DB_TEST_PORT')) {
+            $_ENV['DB_TEST_PORT'] = getenv('DB_TEST_PORT');
+            $_SERVER['DB_TEST_PORT'] = getenv('DB_TEST_PORT');
+        }
+        
+        // Load environment variables from .env if not already loaded
         if (!isset($_ENV['DB_HOST'])) {
             $envFile = __DIR__ . '/../../.env';
             if (file_exists($envFile)) {
@@ -38,6 +60,9 @@ abstract class TestCase extends PHPUnitTestCase
         if (!class_exists('Config')) {
             require_once __DIR__ . '/../../config/loader.php';
         }
+        
+        // Clear config cache to force reload with new env vars
+        \Config\Config::clearCache();
         
         // Use testing database connection for tests
         Connection::reset();
