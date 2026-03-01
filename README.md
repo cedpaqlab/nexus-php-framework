@@ -8,7 +8,7 @@
 > 
 > **Do NOT use this codebase in production.** This is an experimental exploration project meant to evolve and learn from.
 
-Modern PHP Framework with MySQL and Propel ORM, built with best practices and security in mind.
+Modern PHP framework with MySQL and Propel ORM. Views use the **Blade** template engine.
 
 ## Screenshot
 
@@ -25,7 +25,7 @@ Modern PHP Framework with MySQL and Propel ORM, built with best practices and se
 - **Input Validation** - Comprehensive validation rules (required, email, unique, min, max, etc.)
 - **Dependency Injection** - Custom container with service providers
 - **Routing System** - RESTful routes with middleware support
-- **View Rendering** - Template system with layouts
+- **Blade** - Template engine for views and layouts
 - **Error Handling** - Custom exception handlers with logging
 - **Testing** - Comprehensive PHPUnit test suite (214+ tests)
 
@@ -217,7 +217,7 @@ database/
 ├── migrations/          # Migration files
 └── seeders/             # Seeder files
 public/                  # Web root
-resources/views/         # Templates
+resources/views/         # Blade templates
 routes/                  # Route definitions
 storage/                 # Logs, cache, sessions
 tests/                   # Test suites
@@ -231,7 +231,7 @@ The framework follows a layered architecture:
 Controller → Service → Repository → Connector (Propel) → Database
 ```
 
-- **Controllers**: Handle HTTP requests/responses
+- **Controllers**: HTTP handling
 - **Services**: Business logic and validation
 - **Repositories**: Data access abstraction
 - **Connectors**: Propel ORM implementation (encapsulated)
