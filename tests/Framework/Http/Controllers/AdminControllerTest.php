@@ -12,6 +12,7 @@ use App\Services\User\UserService;
 use App\Services\Session\SessionService;
 use App\Services\Security\CsrfService;
 use App\Services\Security\Validator;
+use App\Services\Helpers\PathHelper;
 use App\Http\Response;
 
 class AdminControllerTest extends TestCase
@@ -33,8 +34,11 @@ class AdminControllerTest extends TestCase
         $this->userService = $this->createMock(UserService::class);
         
         $csrfService = new CsrfService($this->session);
-        $this->viewRenderer = new ViewRenderer();
-        $this->viewRenderer->setCsrfService($csrfService);
+        $blade = $this->createBlade(
+            PathHelper::resourcesPath('views'),
+            PathHelper::storagePath('framework/views')
+        );
+        $this->viewRenderer = new ViewRenderer($blade, $csrfService);
         
         $this->validator = $this->createMock(Validator::class);
         $this->validator->method('validate')->willReturn([]);

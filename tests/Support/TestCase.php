@@ -6,9 +6,26 @@ namespace Tests\Support;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use App\Repositories\Database\Connection;
+use Jenssegers\Blade\Blade;
 
 abstract class TestCase extends PHPUnitTestCase
 {
+    /**
+     * Create Blade instance and set Illuminate container global so engine resolver resolves blade.compiler.
+     * Registers @csrf directive to match AppServiceProvider (no csrf_field() dependency).
+     */
+    protected function createBlade(string $viewsPath, string $cachePath): Blade
+    {
+        $blade = new Blade($viewsPath, $cachePath);
+        $ref = new \ReflectionClass($blade);
+        $prop = $ref->getProperty('container');
+        $prop->setAccessible(true);
+        \Illuminate\Container\Container::setInstance($prop->getValue($blade));
+        $blade->directive('csrf', function () {
+            return "<?php echo '<input type=\"hidden\" name=\"_csrf_token\" value=\"'.htmlspecialchars(\$csrf_token ?? '', ENT_QUOTES, 'UTF-8').'\">'; ?>";
+        });
+        return $blade;
+    }
     protected function setUp(): void
     {
         parent::setUp();

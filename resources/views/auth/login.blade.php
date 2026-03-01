@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ $csrf_token ?? '' }}">
     <title>Login - Nexus PHP Framework</title>
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/auth.css">
@@ -24,24 +25,24 @@
                 <div class="auth-card">
                     <h1>Login</h1>
                     <form id="loginForm" class="auth-form">
-                        <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
+                        @csrf
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" id="email" name="email" required autofocus>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" required>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Login</button>
                         </div>
-                        
+
                         <div id="error-message" class="error-message" style="display: none;"></div>
                     </form>
-                    
+
                     <div class="quick-access">
                         <p class="quick-access-label">Quick access (test accounts):</p>
                         <div class="quick-access-links">
@@ -64,15 +65,13 @@
     <script>
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();
-            
             const $errorMsg = $('#error-message');
             $errorMsg.hide();
-            
             $.ajax({
                 url: '/login',
                 method: 'POST',
                 headers: {
-                    'X-CSRF-Token': $('input[name="_csrf_token"]').val()
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 data: $(this).serialize(),
                 success: function(response) {
@@ -83,19 +82,23 @@
                     }
                 },
                 error: function(xhr) {
-                    const response = xhr.responseJSON || {};
-                    $errorMsg.text(response.error || 'An error occurred').show();
+                    let msg = 'An error occurred';
+                    try {
+                        const data = xhr.responseJSON || (xhr.responseText ? JSON.parse(xhr.responseText) : {});
+                        msg = data.error || msg;
+                    } catch (e) {
+                        if (xhr.responseText && xhr.status) {
+                            msg = 'Error ' + xhr.status + (xhr.status === 403 ? ': Invalid or expired security token. Try refreshing the page.' : '');
+                        }
+                    }
+                    $errorMsg.text(msg).show();
                 }
             });
         });
-        
         $('.quick-link').on('click', function(e) {
             e.preventDefault();
-            const email = $(this).data('email');
-            const password = $(this).data('password');
-            
-            $('#email').val(email);
-            $('#password').val(password);
+            $('#email').val($(this).data('email'));
+            $('#password').val($(this).data('password'));
             $('#loginForm').submit();
         });
     </script>

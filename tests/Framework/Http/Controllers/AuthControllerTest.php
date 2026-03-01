@@ -11,6 +11,7 @@ use App\Services\View\ViewRenderer;
 use App\Services\Auth\AuthService;
 use App\Services\Session\SessionService;
 use App\Services\Security\CsrfService;
+use App\Services\Helpers\PathHelper;
 use App\Http\Response;
 
 class AuthControllerTest extends TestCase
@@ -29,8 +30,11 @@ class AuthControllerTest extends TestCase
         
         $session = new SessionService();
         $csrfService = new CsrfService($session);
-        $viewRenderer = new ViewRenderer();
-        $viewRenderer->setCsrfService($csrfService);
+        $blade = $this->createBlade(
+            PathHelper::resourcesPath('views'),
+            PathHelper::storagePath('framework/views')
+        );
+        $viewRenderer = new ViewRenderer($blade, $csrfService);
         
         $this->controller = new AuthController(
             $viewRenderer,
@@ -93,6 +97,45 @@ class AuthControllerTest extends TestCase
         $response = $this->controller->login($request);
         
         $this->assertEquals(401, $response->getStatusCode());
+    }
+
+    public function testLoginReturns503WithConnectionMessageWhenAttemptThrowsConnectionException(): void
+    {
+        $this->authService->expects($this->once())
+            ->method('attempt')
+            ->willThrowException(new \RuntimeException('Unable to open connection'));
+        
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST = ['email' => 'u@e.com', 'password' => 'p'];
+        $request = new Request();
+        
+        $response = $this->controller->login($request);
+        
+        $this->assertEquals(503, $response->getStatusCode());
+        $body = json_decode((string) $response->getContent(), true);
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('error', $body);
+        $this->assertStringContainsString('Database unavailable', $body['error']);
+        $this->assertStringContainsString('.env', $body['error']);
+    }
+
+    public function testLoginReturns503WithGenericMessageWhenAttemptThrowsOtherException(): void
+    {
+        $this->authService->expects($this->once())
+            ->method('attempt')
+            ->willThrowException(new \RuntimeException('Something else'));
+        
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST = ['email' => 'u@e.com', 'password' => 'p'];
+        $request = new Request();
+        
+        $response = $this->controller->login($request);
+        
+        $this->assertEquals(503, $response->getStatusCode());
+        $body = json_decode((string) $response->getContent(), true);
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('error', $body);
+        $this->assertStringContainsString('Login temporarily unavailable', $body['error']);
     }
 
     public function testLogoutLogsOutUser(): void

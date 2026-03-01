@@ -37,12 +37,29 @@ class AuthController
             return $this->response->json(['success' => false, 'error' => 'Email and password are required'], 400);
         }
 
-        if (!$this->authService->attempt($email, $password)) {
-            return $this->response->json(['success' => false, 'error' => 'Invalid credentials'], 401);
+        try {
+            if (!$this->authService->attempt($email, $password)) {
+                return $this->response->json(['success' => false, 'error' => 'Invalid credentials'], 401);
+            }
+        } catch (\Throwable $e) {
+            $message = $this->isConnectionError($e)
+                ? 'Database unavailable. Start MySQL and check .env (DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD).'
+                : 'Login temporarily unavailable. Please try again.';
+            return $this->response->json(['success' => false, 'error' => $message], 503);
         }
 
         $redirectUrl = $this->authService->isSuperAdmin() ? '/admin' : '/dashboard';
         return $this->response->json(['success' => true, 'redirect' => $redirectUrl]);
+    }
+
+    private function isConnectionError(\Throwable $e): bool
+    {
+        $msg = strtolower($e->getMessage());
+        if (str_contains($msg, 'unable to open connection') || str_contains($msg, 'connection refused')) {
+            return true;
+        }
+        $prev = $e->getPrevious();
+        return $prev !== null && $this->isConnectionError($prev);
     }
 
     public function logout(Request $request): Response

@@ -20,8 +20,10 @@ use App\Http\Response;
 use App\Http\Router;
 use App\Http\Middlewares\SuperAdminMiddleware;
 use App\Http\Middlewares\AuthMiddleware;
+use App\Http\Middlewares\CsrfMiddleware;
 use App\Http\Middlewares\SecurityHeadersMiddleware;
 use Container;
+use Jenssegers\Blade\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -73,11 +75,25 @@ class AppServiceProvider extends ServiceProvider
             return new Logger();
         });
 
+        $this->container->singleton(Blade::class, function () {
+            $viewsPath = PathHelper::resourcesPath('views');
+            $cachePath = PathHelper::storagePath('framework/views');
+            $blade = new Blade($viewsPath, $cachePath);
+            // Illuminate View engine resolver uses Container::getInstance(); set Blade's container as global
+            $ref = new \ReflectionClass($blade);
+            $prop = $ref->getProperty('container');
+            $prop->setAccessible(true);
+            \Illuminate\Container\Container::setInstance($prop->getValue($blade));
+            $blade->directive('csrf', function () {
+                return "<?php echo '<input type=\"hidden\" name=\"_csrf_token\" value=\"'.htmlspecialchars(\$csrf_token ?? '', ENT_QUOTES, 'UTF-8').'\">'; ?>";
+            });
+            return $blade;
+        });
+
         $this->container->singleton(ViewRenderer::class, function (Container $container) {
+            $blade = $container->get(Blade::class);
             $csrfService = $container->get(CsrfService::class);
-            $renderer = new ViewRenderer();
-            $renderer->setCsrfService($csrfService);
-            return $renderer;
+            return new ViewRenderer($blade, $csrfService);
         });
     }
 

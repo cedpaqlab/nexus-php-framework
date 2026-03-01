@@ -4,57 +4,38 @@ declare(strict_types=1);
 
 namespace App\Services\View;
 
-use App\Services\Helpers\PathHelper;
 use App\Exceptions\ViewNotFoundException;
+use App\Services\Helpers\PathHelper;
 use App\Services\Security\CsrfService;
+use Jenssegers\Blade\Blade;
 
 class ViewRenderer
 {
-    private readonly string $viewsPath;
     private array $sharedData = [];
-    private ?CsrfService $csrfService = null;
 
-    public function __construct(string $viewsPath = null, ?CsrfService $csrfService = null)
-    {
-        $this->viewsPath = $viewsPath ?? PathHelper::resourcesPath('views');
-        $this->csrfService = $csrfService;
-    }
-
-    public function setCsrfService(CsrfService $csrfService): void
-    {
-        $this->csrfService = $csrfService;
+    public function __construct(
+        private readonly Blade $blade,
+        private readonly ?CsrfService $csrfService = null
+    ) {
     }
 
     public function render(string $view, array $data = []): string
     {
-        $viewFile = $this->viewsPath . '/' . $view . '.php';
+        // Blade uses dot notation: admin/users/index -> admin.users.index
+        $viewName = str_replace('/', '.', $view);
 
-        if (!file_exists($viewFile)) {
+        if (!$this->blade->exists($viewName)) {
             throw new ViewNotFoundException($view);
         }
 
         $data = array_merge($this->sharedData, $data);
-        
+
+        // Centralized CSRF: inject once, layouts/views use @csrf
         if ($this->csrfService !== null) {
             $data['csrf_token'] = $this->csrfService->generate();
         }
 
-        // Use closure to provide variables safely without extract() or variable variables
-        $render = function ($__viewFile, $__data) {
-            // Isolate scope and provide data as array for safer access
-            ob_start();
-            (function () use ($__viewFile, $__data) {
-                // Extract data into local scope safely
-                foreach ($__data as $__key => $__value) {
-                    ${$__key} = $__value;
-                }
-                unset($__key, $__value);
-                include $__viewFile;
-            })();
-            return ob_get_clean();
-        };
-
-        return $render($viewFile, $data);
+        return $this->blade->render($viewName, $data);
     }
 
     public function share(string $key, mixed $value): void
@@ -64,6 +45,6 @@ class ViewRenderer
 
     public function getViewsPath(): string
     {
-        return $this->viewsPath;
+        return PathHelper::resourcesPath('views');
     }
 }

@@ -1,28 +1,28 @@
-<?php
-$title = 'Create User';
-ob_start();
-?>
+@extends('layouts.admin')
 
+@section('title', 'Create User')
+
+@section('content')
 <section class="admin-section">
     <h1>Create User</h1>
-    
+
     <form id="createUserForm" class="user-form">
-        <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
+        @csrf
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" required>
         </div>
-        
+
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" required>
         </div>
-        
+
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required minlength="8">
         </div>
-        
+
         <div class="form-group">
             <label for="role">Role</label>
             <select id="role" name="role">
@@ -30,12 +30,12 @@ ob_start();
                 <option value="admin">Admin</option>
             </select>
         </div>
-        
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Create User</button>
             <a href="/admin/users" class="btn btn-secondary">Cancel</a>
         </div>
-        
+
         <div id="error-messages" class="error-messages" style="display: none;"></div>
     </form>
 </section>
@@ -43,15 +43,13 @@ ob_start();
 <script>
 $('#createUserForm').on('submit', function(e) {
     e.preventDefault();
-    
     const $errorMessages = $('#error-messages');
     $errorMessages.hide().empty();
-    
     $.ajax({
         url: '/admin/users',
         method: 'POST',
         headers: {
-            'X-CSRF-Token': $('input[name="_csrf_token"]').val()
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         data: $(this).serialize(),
         success: function(response) {
@@ -62,12 +60,8 @@ $('#createUserForm').on('submit', function(e) {
                 if (response.errors) {
                     errorHtml = '<ul>';
                     for (const field in response.errors) {
-                        const fieldErrors = Array.isArray(response.errors[field]) 
-                            ? response.errors[field] 
-                            : [response.errors[field]];
-                        fieldErrors.forEach(error => {
-                            errorHtml += '<li>' + error + '</li>';
-                        });
+                        const fieldErrors = Array.isArray(response.errors[field]) ? response.errors[field] : [response.errors[field]];
+                        fieldErrors.forEach(error => { errorHtml += '<li>' + error + '</li>'; });
                     }
                     errorHtml += '</ul>';
                 } else {
@@ -82,12 +76,8 @@ $('#createUserForm').on('submit', function(e) {
             if (response.errors) {
                 errorHtml = '<ul>';
                 for (const field in response.errors) {
-                    const fieldErrors = Array.isArray(response.errors[field]) 
-                        ? response.errors[field] 
-                        : [response.errors[field]];
-                    fieldErrors.forEach(error => {
-                        errorHtml += '<li>' + error + '</li>';
-                    });
+                    const fieldErrors = Array.isArray(response.errors[field]) ? response.errors[field] : [response.errors[field]];
+                    fieldErrors.forEach(error => { errorHtml += '<li>' + error + '</li>'; });
                 }
                 errorHtml += '</ul>';
             } else {
@@ -98,9 +88,4 @@ $('#createUserForm').on('submit', function(e) {
     });
 });
 </script>
-
-<?php
-$content = ob_get_clean();
-$csrf_token = $csrf_token ?? '';
-include __DIR__ . '/../../layouts/admin.php';
-?>
+@endsection

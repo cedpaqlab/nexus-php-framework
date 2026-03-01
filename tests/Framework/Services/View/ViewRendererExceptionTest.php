@@ -6,6 +6,7 @@ namespace Tests\Framework\Services\View;
 
 use Tests\Support\TestCase;
 use App\Services\View\ViewRenderer;
+use App\Services\Helpers\PathHelper;
 use App\Exceptions\ViewNotFoundException;
 
 class ViewRendererExceptionTest extends TestCase
@@ -15,7 +16,11 @@ class ViewRendererExceptionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->renderer = new ViewRenderer(__DIR__ . '/../../../resources/views');
+        $blade = $this->createBlade(
+            PathHelper::resourcesPath('views'),
+            PathHelper::storagePath('framework/views')
+        );
+        $this->renderer = new ViewRenderer($blade, null);
     }
 
     public function testRenderThrowsViewNotFoundException(): void

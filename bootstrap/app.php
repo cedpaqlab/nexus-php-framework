@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-// Load Composer autoloader first (for Propel and other vendor classes)
-require_once __DIR__ . '/../vendor/autoload.php';
-
+// Load .env first so DB/config are correct when autoload runs (e.g. propel.php)
 require_once __DIR__ . '/env.php';
+
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/autoloader.php';
 require_once __DIR__ . '/../config/loader.php';
 require_once __DIR__ . '/propel.php';

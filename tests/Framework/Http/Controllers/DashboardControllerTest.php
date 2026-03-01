@@ -10,6 +10,7 @@ use App\Http\Request;
 use App\Services\View\ViewRenderer;
 use App\Services\Session\SessionService;
 use App\Services\Security\CsrfService;
+use App\Services\Helpers\PathHelper;
 use App\Http\Response;
 
 class DashboardControllerTest extends TestCase
@@ -27,8 +28,11 @@ class DashboardControllerTest extends TestCase
         $this->session = new SessionService();
         
         $csrfService = new CsrfService($this->session);
-        $viewRenderer = new ViewRenderer();
-        $viewRenderer->setCsrfService($csrfService);
+        $blade = $this->createBlade(
+            PathHelper::resourcesPath('views'),
+            PathHelper::storagePath('framework/views')
+        );
+        $viewRenderer = new ViewRenderer($blade, $csrfService);
         
         $this->controller = new DashboardController(
             $viewRenderer,
