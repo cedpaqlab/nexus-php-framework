@@ -10,6 +10,10 @@
 
 Modern PHP Framework with MySQL and Propel ORM, built with best practices and security in mind.
 
+## Screenshot
+
+![Homepage](screenshot.png)
+
 ## Features
 
 - **Propel ORM 2.0** - Full ORM integration with type-safe queries
