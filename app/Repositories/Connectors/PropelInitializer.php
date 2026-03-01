@@ -12,6 +12,14 @@ class PropelInitializer
 {
     private static bool $initialized = false;
 
+    /**
+     * Reset initialization state. Use in tests so Propel is reconfigured with testing connection.
+     */
+    public static function resetForTesting(): void
+    {
+        self::$initialized = false;
+    }
+
     public static function initialize(): void
     {
         if (self::$initialized) {
@@ -35,7 +43,8 @@ class PropelInitializer
             $serviceContainer = Propel::getServiceContainer();
         }
 
-        if ($serviceContainer->hasConnectionManager('default')) {
+        $forceReconfigure = isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing';
+        if (!$forceReconfigure && $serviceContainer->hasConnectionManager('default')) {
             self::$initialized = true;
             return;
         }
@@ -44,9 +53,7 @@ class PropelInitializer
         $serviceContainer->setDefaultDatasource('default');
 
         $manager = new ConnectionManagerSingle('default');
-        $config = self::buildConnectionConfig();
-
-        $manager->setConfiguration($config);
+        $manager->setConfiguration(self::buildConnectionConfig());
         $serviceContainer->setConnectionManager($manager);
 
         self::$initialized = true;

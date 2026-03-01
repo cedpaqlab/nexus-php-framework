@@ -31,6 +31,10 @@ abstract class TestCase extends PHPUnitTestCase
         parent::setUp();
         
         // Ensure PHPUnit environment variables are loaded first
+        if (getenv('APP_ENV')) {
+            $_ENV['APP_ENV'] = getenv('APP_ENV');
+            $_SERVER['APP_ENV'] = getenv('APP_ENV');
+        }
         if (getenv('DB_TEST_DATABASE')) {
             $_ENV['DB_TEST_DATABASE'] = getenv('DB_TEST_DATABASE');
             $_SERVER['DB_TEST_DATABASE'] = getenv('DB_TEST_DATABASE');
@@ -84,6 +88,9 @@ abstract class TestCase extends PHPUnitTestCase
         // Use testing database connection for tests
         Connection::reset();
         Connection::setConnection('testing');
+        if (class_exists(\App\Repositories\Connectors\PropelInitializer::class)) {
+            \App\Repositories\Connectors\PropelInitializer::resetForTesting();
+        }
     }
 
     protected function tearDown(): void
